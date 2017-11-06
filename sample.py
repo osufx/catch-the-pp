@@ -1,6 +1,6 @@
 import sys
 
-from lib.Beatmap import Beatmap
+from osu.Beatmap import Beatmap
 from starCalc import DifficultyCTB
 from ppCalc import GetPP
 

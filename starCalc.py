@@ -1,5 +1,5 @@
-from lib.MathHelper import Clamp, Sign
-from lib.Beatmap import Beatmap
+from osu.MathHelper import Clamp, Sign
+from osu.Beatmap import Beatmap
 
 STAR_SCALING_FACTOR = 0.145
 STRAIN_STEP = 750

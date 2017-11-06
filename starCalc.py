@@ -1,6 +1,5 @@
-#!/usr/bin/python3
-import json
-import sys #for argument passing
+from lib.MathHelper import Clamp, Sign
+from lib.Beatmap import Beatmap
 
 STAR_SCALING_FACTOR = 0.145
 STRAIN_STEP = 750
@@ -9,113 +8,6 @@ DECAY_BASE = 0.2
 ABSOLUTE_PLAYER_POSITIONING_ERROR = 16
 NORMALIZED_HITOBJECT_RADIUS = 41
 DIRECTION_CHANGE_BONUS = 12.5
-
-def Clamp(value, mn, mx):
-    return min(max(mn, value), mx)
-
-def Sign(value):
-    if value == 0:
-        return 0
-    elif value > 0:
-        return 1
-    else:
-        return -1
-
-class Vec2(object):
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-class HitObject(object):
-    def __init__(self, x, y, time, t):
-        self.x = x
-        self.y = y
-        self.time = time
-        self.type = t
-
-class HitObjectSlider(object):
-    def __init__(self, hitObject, sliderType, curvePoints, repeat, pixelLength):
-        self.x = hitObject.x #Just no (Do this propperly or whatever...)
-        self.time = hitObject.time #Just no
-        self.hitObject = hitObject
-        self.sliderType = sliderType
-        self.curvePoints = curvePoints
-        self.repeat = repeat
-        self.pixelLength = pixelLength
-
-    def GetPoints(self):
-        val = 2                     #There is always a start and an end hitobject on every slider
-
-        val *= self.repeat          #Reverse slider
-        val -= (self.repeat - 1)    #Remove the reversearrow hitobject so it doesnt count reverse points twice
-
-class Beatmap(object):
-    def __init__(self, fileName):
-        self.fileName = fileName
-        self.header = -1
-        self.difficultyJson = ""
-        self.difficulty = {}
-        self.hitObjects = []
-        self.ParseBeatmap()
-    
-    def ParseBeatmap(self):
-        with open(self.fileName) as fileStream:
-            for line in fileStream:
-                self.ParseLine(line.replace("\n", ""))
-        self.ParseDifficulty()
-
-    def ParseLine(self, line):
-        if len(line) < 1:
-            return
-        
-        if line.startswith("["):
-            if line == "[Difficulty]":
-                self.header = 0
-            elif line == "[TimingPoints]":
-                self.header = 1
-            elif line == "[HitObjects]":
-                self.header = 2
-            else:
-                self.header = -1
-            return
-
-        if self.header == -1: #We return if we are reading under a header we dont care about
-            return
-
-        if self.header == 0:
-            self.HandleDifficultyPropperty(line)
-        elif self.header == 1:
-            #Cry more
-            #print("NOT IMPLEMENTED: (TimingPoint) " + line)
-            a = 1 #Placeholder
-        elif self.header == 2:
-            self.HandleHitObject(line)
-    
-    def HandleDifficultyPropperty(self, propperty):
-        prop = propperty.split(":")
-        self.difficultyJson += '"{}":{},'.format(prop[0], prop[1])
-    
-    def ParseDifficulty(self):
-        self.difficultyJson = "{" + self.difficultyJson[:-1] + "}"
-        self.difficulty = json.loads(self.difficultyJson)
-
-    def HandleHitObject(self, line):
-        splitObject = line.split(",")
-        hitObject = HitObject(int(splitObject[0]), int(splitObject[1]), int(splitObject[2]), int(splitObject[3]))
-
-        if not (1 & hitObject.type > 0 or 2 & hitObject.type > 0):  #We only want sliders and circles as spinners are random bannanas etc.
-            return
-        
-        if 2 & hitObject.type:  #Slider
-            curveSplit = splitObject[6].split("|")
-            curvePoints = []
-            for i in range(1, len(curveSplit)):
-                vectorSplit = curveSplit[i].split(":")
-                vector = Vec2(int(vectorSplit[0]), int(vectorSplit[1]))
-                curvePoints.append(vector)
-            hitObject = HitObjectSlider(hitObject, curveSplit[0], curvePoints, int(splitObject[6]), float(splitObject[7]))
-
-        self.hitObjects.append(hitObject)
 
 class DifficultyObject(object):
     def __init__(self, hitObject, playerWidth):
@@ -176,6 +68,8 @@ class DifficultyCTB(object):
     def __init__(self, beatmap, mods):
         self.beatmap = beatmap
         self.mods = mods
+    
+    def GetStars(self):
         self.timeRate = self.getTimeRate()
         self.DifficultyObjects = []
 
@@ -192,8 +86,7 @@ class DifficultyCTB(object):
         self.CalculateStrainValues()
 
         self.starRating = pow(self.CalculateDifficulty(), 0.5) * STAR_SCALING_FACTOR
-
-        print("starRating = {}".format(self.starRating))
+        return self.starRating
 
     def AdjustDifficulty(self, diff, mods): #I belive ripple common has some sort of mods enum themselfs but I just do it this way for now
         if mods & 1 << 1 > 0:       #EZ
@@ -259,11 +152,13 @@ class DifficultyCTB(object):
         interval = strainStep
         maxStrain = 0
 
+        last = None
+
         for difficultyObject in self.DifficultyObjects:
             while difficultyObject.hitObject.time > interval:
                 highestStrains.append(maxStrain)
 
-                if 'last' not in locals():
+                if last == None:
                     maxStrain = 0
                 else:
                     decay = pow(DECAY_BASE, (interval - last.hitObject.time) / 1000)
@@ -287,14 +182,3 @@ class DifficultyCTB(object):
             weight *= DECAY_WEIGHT
         
         return difficulty
-
-if len(sys.argv) <= 1:
-    beatmap = Beatmap("/media/emily/Ayyy/test.osu") #Yes... this be my work directory (Will remove when project is done)
-else:
-    beatmap = Beatmap(sys.argv[1])
-
-if len(sys.argv) >= 3:
-    mods = int(sys.argv[2])
-else:
-    mods = 0
-calc = DifficultyCTB(beatmap, mods)

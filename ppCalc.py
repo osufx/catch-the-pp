@@ -15,18 +15,18 @@ def GetPP(diff, accuracy, combo, miss, mods):
     if diff.beatmap.difficulty["ApproachRate"] < 8:
         pp *= 1 + 0.025 * (8 - diff.beatmap.difficulty["ApproachRate"])
 
-    if diff.mods & 1 << 4 > 0:    #HD
+    if diff.mods & 1 << 3 > 0:    #HD
         pp *= 1.05 + 0.075 * (10 - min(10, diff.beatmap.difficulty["ApproachRate"]))
     
-    if diff.mods & 1 << 4 > 0:    #FL
+    if diff.mods & 1 << 10 > 0:    #FL
         pp *= 1.35 * lengthBonus
     
     pp *= pow(accuracy, 5.5)
 
-    if diff.mods & 1 << 4 > 0:    #NF
+    if diff.mods & 1 << 0 > 0:    #NF
         pp *= 0.9
     
-    if diff.mods & 1 << 4 > 0:    #SO
+    if diff.mods & 1 << 12 > 0:    #SO
         pp *= 0.95
     
     return pp

@@ -1,5 +1,4 @@
 import sys
-import json
 
 from osu.Beatmap import Beatmap
 from starCalc import DifficultyCTB

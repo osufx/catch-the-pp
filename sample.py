@@ -1,4 +1,5 @@
 import sys
+import json
 
 from osu.Beatmap import Beatmap
 from starCalc import DifficultyCTB
@@ -15,6 +16,5 @@ else:
     mods = 0
 calc = DifficultyCTB(beatmap, mods)
 
-print(calc.GetStars())
-
-print(GetPP(calc, 1, 300, 0, 0))
+print("Stars: {}".format(calc.GetStars()))
+print("PP: {}".format(GetPP(calc, 1, 300, 0, 0)))

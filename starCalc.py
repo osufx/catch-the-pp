@@ -11,7 +11,7 @@ DIRECTION_CHANGE_BONUS = 12.5
 
 class DifficultyObject(object):
     def __init__(self, hitObject, playerWidth):
-        self.strain = 0
+        self.strain = 1
         self.offset = 0
         self.lastMovement = 0
         self.hitObject = hitObject
@@ -51,9 +51,9 @@ class DifficultyObject(object):
                     additionBonus += 0.3 * bonusFactor
             
             addition += 7.5 * min(abs(self.lastMovement), NORMALIZED_HITOBJECT_RADIUS * 2) / (NORMALIZED_HITOBJECT_RADIUS * 6) / sqrtTime
-        
+
         if last.hyperdashDistance <= 10:
-            if last.hyperdash:
+            if not last.hyperdash:
                 additionBonus += 1
             else:
                 self.offset = 0
@@ -118,10 +118,10 @@ class DifficultyCTB(object):
             if next.hitObject.x > current.hitObject.x:
                 direction = 1
             else:
-                direction -1
+                direction = -1
             
-            timeToNext = next.hitObject.time - current.hitObject.time - 15
-            distanceToNext = abs(next.hitObject.x - current.hitObject.x)
+            timeToNext = next.hitObject.time - current.hitObject.time - 4.166667 #ms for 60fps divided by 4
+            distanceToNext = abs(next.hitObject.x - current.hitObject.x) 
             if lastDirection == direction:
                 distanceToNext -= last
             else:

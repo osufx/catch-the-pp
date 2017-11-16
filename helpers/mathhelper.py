@@ -7,3 +7,12 @@ def Cpn(p, n):
         out = out * (n - p + i) / i
     
     return out
+
+def Array_calc(o, a0, a1):
+    m = min(len(a0), len(a1))
+    r = []
+
+    for i in range(m):
+        r.append(a0[i] + o * a1[i])
+    
+    return r

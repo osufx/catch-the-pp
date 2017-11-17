@@ -1,4 +1,3 @@
-from helpers import vectors
 from osu import MathHelper
 
 class Bezier(object):
@@ -25,6 +24,6 @@ class Bezier(object):
                 x += a * self.points[p].x
                 y += a * self.points[p].y
             
-            point = vectors.Vec2(x, y)
+            point = MathHelper.Vec2(x, y)
             self.pos.append(point)
             i += self.step

@@ -1,4 +1,3 @@
-from helpers import vectors
 from osu import MathHelper
 
 #Yes... I cry deep down on the inside aswell
@@ -41,4 +40,4 @@ class Catmull(object):
 def getPoint(p, length):
     x = MathHelper.Catmull([o.x for o in p], length)
     y = MathHelper.Catmull([o.y for o in p], length)
-    return vectors.Vec2(x, y)
+    return MathHelper.Vec2(x, y)

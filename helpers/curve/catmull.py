@@ -1,4 +1,5 @@
-from helpers import vectors, mathhelper
+from helpers import vectors
+from osu import MathHelper
 
 #Yes... I cry deep down on the inside aswell
 class Catmull(object):
@@ -16,9 +17,6 @@ class Catmull(object):
         for x in range(self.order - 1):
             t = 0
             while t < self.step + 1:
-                
-                
-
                 if x >= 1:
                     v1 = self.points[x - 1]
                 else:
@@ -29,13 +27,18 @@ class Catmull(object):
                 if x + 1 < self.order:
                     v3 = self.points[x + 1]
                 else:
-                    v3 = mathhelper.Array_calc(1, v2, mathhelper.Array_calc(-1, v2, v1))
+                    v3 = v2.calc(1, v2.calc(-1, v1))
                 
                 if x + 2 < self.order:
                     v4 = self.points[x + 2]
                 else:
-                    v4 = mathhelper.Array_calc(1, v3, mathhelper.Array_calc(-1, v3, v2))
-                
+                    v4 = v3.calc(1, v3.calc(-1, v2))
 
-
+                point = getPoint([v1, v2, v3, v4], t)
+                self.pos.append(point)
                 t += self.step
+
+def getPoint(p, length):
+    x = MathHelper.Catmull([o.x for o in p], length)
+    y = MathHelper.Catmull([o.y for o in p], length)
+    return vectors.Vec2(x, y)

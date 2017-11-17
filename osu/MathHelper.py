@@ -30,9 +30,9 @@ class Vec2(object):
     def distance(self, other):
         x = self.x - other.x
         y = self.y - other.y
-        return pow(x*x + y*y, 0.5) #sqrt, lol
+        return pow(x*x + y*y, 0.5)  #sqrt, lol
     
-    def calc(self, value, other):
+    def calc(self, value, other):   #I dont know what to call this function yet
         x = self.x + value * other.x
         y = self.y + value * other.y
         return Vec2(x, y)

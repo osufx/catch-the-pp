@@ -4,22 +4,36 @@ from osu.MathHelper import Vec2
 import json
 
 class Beatmap(object):
+    """
+    Beatmap object for beatmap parsing and handling
+    """
+
     def __init__(self, fileName):
+        """
+        fileName -- Directory for beatmap file (.osu)
+        """
         self.fileName = fileName
         self.header = -1
-        self.difficultyJson = ""
         self.difficulty = {}
         self.hitObjects = []
         self.ParseBeatmap()
         self.objectCount = self.GetObjectCount()
     
     def ParseBeatmap(self):
+        """
+        Parses beatmap file line by line by passing each line into ParseLine.
+        """
         with open(self.fileName) as fileStream:
             for line in fileStream:
                 self.ParseLine(line.replace("\n", ""))
-        self.ParseDifficulty()
 
     def ParseLine(self, line):
+        """
+        Parse a beatmapfile line.
+
+        Handles lines that are required for our use case (Difficulty, TimingPoints & HitObjects), 
+        everything else is skipped.
+        """
         if len(line) < 1:
             return
         
@@ -47,14 +61,19 @@ class Beatmap(object):
             self.HandleHitObject(line)
     
     def HandleDifficultyPropperty(self, propperty):
+        """
+        Puts the [Difficulty] propperty into the difficulty dict.
+        """
         prop = propperty.split(":")
-        self.difficultyJson += '"{}":{},'.format(prop[0], prop[1])
-    
-    def ParseDifficulty(self):
-        self.difficultyJson = "{" + self.difficultyJson[:-1] + "}"
-        self.difficulty = json.loads(self.difficultyJson)
+        self.difficulty[prop[0]] = float(prop[1])
 
     def HandleHitObject(self, line):
+        """
+        Puts every hitobject into the hitObjects array.
+
+        Creates HitObjects, HitObjectSliders or skip depending on the given data.
+        We skip everything that is not important for us for our use case (Spinners)
+        """
         splitObject = line.split(",")
         hitObject = HitObject(int(splitObject[0]), int(splitObject[1]), int(splitObject[2]), int(splitObject[3]))
 
@@ -73,6 +92,11 @@ class Beatmap(object):
         self.hitObjects.append(hitObject)
 
     def GetObjectCount(self):
+        """
+        Get the total hitobject count for the parsed beatmap (Normal hitobjects, sliders & sliderticks)
+
+        return -- total hitobjects for parsed beatmap
+        """
         count = 0
         for hitObject in self.hitObjects:
             count += hitObject.GetPoints()

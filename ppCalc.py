@@ -1,6 +1,15 @@
 import math
 
-def GetPP(diff, accuracy, combo, miss, mods):
+def calculatePP(diff, accuracy, combo, miss):
+    """
+    Calculate pp for gameplay
+
+    diff        -- Difficulty object
+    accuracy    -- Accuracy of the play             (Float 0-1)
+    combo       -- MaxCombo achived during the play (Int)
+    miss        -- Amount of misses during the play (Int)
+    return      -- Total pp for gameplay
+    """
     pp = pow(((5 * diff.starRating / 0.0049) - 4), 2) / 100000
     lengthBonus = 0.95 + 0.4 * min(1, combo / 3000)
     if combo > 3000:

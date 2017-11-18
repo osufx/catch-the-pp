@@ -1,12 +1,12 @@
 import constants
-from osu.MathHelper import Clamp, Sign
+from osu.MathHelper import clamp, sign
 
 class DifficultyObject(object):
         """
         Object that holds strain value etc.
 
-        Handled in Difficulty.CalculateStrainValues & Difficulty.UpdateHyperdash_distance.
-        Used in Difficulty.CalculateDifficulty
+        Handled in Difficulty.calculate_strainValues & Difficulty.update_hyperdash_distance.
+        Used in Difficulty.calculate_difficulty
         """
         def __init__(self, hitobject, player_width):
             """
@@ -25,18 +25,18 @@ class DifficultyObject(object):
             self.hyperdash_distance = 0
             self.hyperdash = False
 
-        def CalculateStrain(self, last, timeRate):
+        def calculate_strain(self, last, time_rate):
             """
             Calculate strain value by refering last object.
             (and sets offset & last_movement info)
 
             last        -- Previous hitobject
-            timerate    -- Timescale from enabled mods
+            time_rate    -- Timescale from enabled mods
             """
-            time = (self.hitobject.time - last.hitobject.time) / timeRate
+            time = (self.hitobject.time - last.hitobject.time) / time_rate
             decay = pow(constants.DECAY_BASE, time / 1000)
 
-            self.offset = Clamp(last.scaled_position + last.offset,
+            self.offset = clamp(last.scaled_position + last.offset,
                 self.scaled_position - (constants.NORMALIZED_HITOBJECT_RADIUS - self.error_margin),
                 self.scaled_position + (constants.NORMALIZED_HITOBJECT_RADIUS - self.error_margin)
             ) - self.scaled_position
@@ -52,7 +52,7 @@ class DifficultyObject(object):
             sqrt_time = pow(max(time, 25), 0.5)
 
             if abs(self.last_movement) > 0.1:
-                if abs(last.last_movement) > 0.1 and Sign(self.last_movement) != Sign(last.last_movement):
+                if abs(last.last_movement) > 0.1 and sign(self.last_movement) != sign(last.last_movement):
                     bonus = constants.DIRECTION_CHANGE_BONUS / sqrt_time
                     bonus_factor = min(self.error_margin, abs(self.last_movement)) / self.error_margin
 
@@ -95,22 +95,22 @@ class Difficulty(object):
         self.difficulty_objects = []
 
         #Do the calculation
-        self.time_rate = self.getTimeRate()
-        self.player_width = 305 / 1.6 * ((102.4 * (1 - 0.7 * self.AdjustDifficulty(self.beatmap.difficulty["CircleSize"], self.mods))) / 128) * 0.7
+        self.time_rate = self.get_time_rate()
+        self.player_width = 305 / 1.6 * ((102.4 * (1 - 0.7 * self.adjust_difficulty(self.beatmap.difficulty["CircleSize"], self.mods))) / 128) * 0.7
 
         for hitobject in self.beatmap.hitobjects:
             self.difficulty_objects.append(DifficultyObject(hitobject, self.player_width * 0.4))
 
-        self.UpdateHyperdash_distance()
+        self.update_hyperdash_distance()
 
         #Sort the list so its sorted by time (Incase it somehow isnt)
         self.difficulty_objects.sort(key=lambda o: o.hitobject.time)
 
-        self.CalculateStrainValues()
+        self.calculate_strain_values()
 
-        self.star_rating = pow(self.CalculateDifficulty(), 0.5) * constants.STAR_SCALING_FACTOR
+        self.star_rating = pow(self.calculate_difficulty(), 0.5) * constants.STAR_SCALING_FACTOR
 
-    def AdjustDifficulty(self, diff, mods):
+    def adjust_difficulty(self, diff, mods):
         """
         Scale difficulty from selected mods.
 
@@ -125,11 +125,11 @@ class Difficulty(object):
 
         return (diff - 5) / 5
 
-    def getTimeRate(self):
+    def get_time_rate(self):
         """
-        Get scaled timerate from mods. (DT / HT)
+        Get scaled time_rate from mods. (DT / HT)
 
-        return -- timerate
+        return -- time_rate
         """
         rate = 1
 
@@ -140,7 +140,7 @@ class Difficulty(object):
 
         return rate
 
-    def UpdateHyperdash_distance(self):
+    def update_hyperdash_distance(self):
         """
         Update hyperdash_distance value for every hitobject in the beatmap.
         """
@@ -158,7 +158,7 @@ class Difficulty(object):
                 direction = -1
 
             time_to_next = next.hitobject.time - current.hitobject.time - 4.166667 #ms for 60fps divided by 4
-            distance_to_next = abs(next.hitobject.x - current.hitobject.x) 
+            distance_to_next = abs(next.hitobject.x - current.hitobject.x)
             if last_direction == direction:
                 distance_to_next -= last
             else:
@@ -169,27 +169,27 @@ class Difficulty(object):
                 last = player_width_half
             else:
                 current.hyperdash_distance = time_to_next - distance_to_next
-                last = Clamp(current.hyperdash_distance, 0, player_width_half)
+                last = clamp(current.hyperdash_distance, 0, player_width_half)
 
             last_direction = direction
-    
-    def CalculateStrainValues(self):
+
+    def calculate_strain_values(self):
         """
         Calculate strain values for every hitobject.
 
         It does this by using distance, decay & previous hitobject strain value.
-        Timerate also effects this.
+        Time_rate also effects this.
         """
         current = self.difficulty_objects[0]
 
         index = 1
         while index < len(self.difficulty_objects):
             next = self.difficulty_objects[index]
-            next.CalculateStrain(current, self.time_rate)
+            next.calculate_strain(current, self.time_rate)
             current = next
             index += 1
 
-    def CalculateDifficulty(self):
+    def calculate_difficulty(self):
         """
         Calculates the difficulty for this beatmap.
         This is used in the final function to calculate star rating.

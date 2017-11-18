@@ -5,7 +5,7 @@ class HitObject(object):
         self.time = time
         self.type = t
 
-    def GetPoints(self):        #This is used to get the total amount of hitobjects
+    def get_points(self):        #This is used to get the total amount of hitobjects
         return 1
 
 class HitObjectSlider(object):
@@ -18,7 +18,7 @@ class HitObjectSlider(object):
         self.repeat = repeat
         self.pixel_length = pixel_length
 
-    def GetPoints(self):        #This is used to get the total amount of hitobjects
+    def get_points(self):        #This is used to get the total amount of hitobjects
         val = 2                     #There is always a start and an end hitobject on every slider
 
         val *= self.repeat          #Reverse slider

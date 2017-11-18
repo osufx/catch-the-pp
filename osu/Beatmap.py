@@ -14,18 +14,18 @@ class Beatmap(object):
         self.header = -1
         self.difficulty = {}
         self.hitobjects = []
-        self.ParseBeatmap()
-        self.object_count = self.GetObjectCount()
+        self.parse_beatmap()
+        self.object_count = self.get_object_count()
     
-    def ParseBeatmap(self):
+    def parse_beatmap(self):
         """
-        Parses beatmap file line by line by passing each line into ParseLine.
+        Parses beatmap file line by line by passing each line into parse_line.
         """
         with open(self.file_name) as file_stream:
             for line in file_stream:
-                self.ParseLine(line.replace("\n", ""))
+                self.parse_line(line.replace("\n", ""))
 
-    def ParseLine(self, line):
+    def parse_line(self, line):
         """
         Parse a beatmapfile line.
 
@@ -34,7 +34,7 @@ class Beatmap(object):
         """
         if len(line) < 1:
             return
-        
+
         if line.startswith("["):
             if line == "[Difficulty]":
                 self.header = 0
@@ -50,22 +50,22 @@ class Beatmap(object):
             return
 
         if self.header == 0:
-            self.HandleDifficultyPropperty(line)
+            self.handle_difficulty_propperty(line)
         elif self.header == 1:
             #Cry more
             #print("NOT IMPLEMENTED: (TimingPoint) " + line)
             a = 1 #Placeholder
         elif self.header == 2:
-            self.HandleHitobject(line)
+            self.handle_hitobject(line)
     
-    def HandleDifficultyPropperty(self, propperty):
+    def handle_difficulty_propperty(self, propperty):
         """
         Puts the [Difficulty] propperty into the difficulty dict.
         """
         prop = propperty.split(":")
         self.difficulty[prop[0]] = float(prop[1])
 
-    def HandleHitobject(self, line):
+    def handle_hitobject(self, line):
         """
         Puts every hitobject into the hitobjects array.
 
@@ -89,7 +89,7 @@ class Beatmap(object):
 
         self.hitobjects.append(hitobject)
 
-    def GetObjectCount(self):
+    def get_object_count(self):
         """
         Get the total hitobject count for the parsed beatmap (Normal hitobjects, sliders & sliderticks)
 
@@ -97,5 +97,5 @@ class Beatmap(object):
         """
         count = 0
         for hitobject in self.hitobjects:
-            count += hitobject.GetPoints()
+            count += hitobject.get_points()
         return count

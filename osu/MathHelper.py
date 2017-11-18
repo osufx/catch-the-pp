@@ -1,7 +1,7 @@
-def Clamp(value, mn, mx):
+def clamp(value, mn, mx):
     return min(max(mn, value), mx)
 
-def Sign(value):
+def sign(value):
     if value == 0:
         return 0
     elif value > 0:
@@ -9,17 +9,17 @@ def Sign(value):
     else:
         return -1
 
-def Cpn(p, n):
+def cpn(p, n):
     if p < 0 or p > n:
         return 0
     p = min(p, n - p)
     out = 1
     for i in range(1, p + 1):
         out = out * (n - p + i) / i
-    
+
     return out
 
-def Catmull(p, t): # WARNING:   Worst math formula incomming
+def catmull(p, t): # WARNING:   Worst math formula incomming
     return 0.5 * (
         (2 * p[1]) +
         (-p[0] + p[2]) * t +
@@ -35,7 +35,7 @@ class Vec2(object):
         x = self.x - other.x
         y = self.y - other.y
         return pow(x*x + y*y, 0.5)  #sqrt, lol
-    
+
     def calc(self, value, other):   #I dont know what to call this function yet
         x = self.x + value * other.x
         y = self.y + value * other.y

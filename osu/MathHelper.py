@@ -26,6 +26,14 @@ def catmull(p, t): # WARNING:   Worst math formula incomming
         (2 * p[0] - 5 * p[1] + 4 * p[2] - p[3]) * pow(t, 2) +
         (-p[0] + 3 * p[1] - 3 * p[2] + p[3]) * pow(t, 3))
 
+def point_on_line(p0, p1, length):
+    full_length = pow(pow(p1.x - p0.x, 2) + pow(p1.y - p0.y, 2), 0.5)
+    n = full_length - length
+
+    x = (n * p0.x + length * p1.x) / full_length
+    y = (n * p0.y + length * p1.y) / full_length
+    return Vec2(x, y)
+
 class Vec2(object):
     def __init__(self, x, y):
         self.x = x

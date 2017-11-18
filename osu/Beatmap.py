@@ -79,7 +79,7 @@ class Beatmap(object):
             return
 
         if 2 & hitobject.type:  #Slider
-            curve_split = split_object[6].split("|")
+            curve_split = split_object[5].split("|")
             curve_points = []
             for i in range(1, len(curve_split)):
                 vector_split = curve_split[i].split(":")

@@ -1,3 +1,5 @@
+from osu.MathHelper import Vec2, point_on_line
+
 class HitObject(object):
     def __init__(self, x, y, time, t):
         self.x = x
@@ -17,6 +19,7 @@ class HitObjectSlider(object):
         self.curve_points = curve_points
         self.repeat = repeat
         self.pixel_length = pixel_length
+        self.calculate_slider()
 
     def get_points(self):        #This is used to get the total amount of hitobjects
         val = 2                     #There is always a start and an end hitobject on every slider
@@ -24,3 +27,16 @@ class HitObjectSlider(object):
         val *= self.repeat          #Reverse slider
         val -= (self.repeat - 1)    #Remove the reversearrow hitobject so it doesnt count reverse points twice
         return val
+
+    def calculate_slider(self):
+        print("Slidertype: {}".format(self.slider_type))    #DEBUG
+        if self.slider_type == "L":     #Linear
+            return
+        elif self.slider_type == "P":   #Perfect
+            return
+        elif self.slider_type == "B":   #Bezier
+            return
+        elif self.slider_type == "C":   #Catmull
+            return
+        else:
+            raise Exception("Slidertype not supported! ({})".format(self.slider_type))

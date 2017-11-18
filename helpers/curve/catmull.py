@@ -7,9 +7,9 @@ class Catmull(object):
         self.order = len(points)
         self.step = 0.025
         self.pos = []
-        self.calcPoints()
+        self.calc_points()
 
-    def calcPoints(self):
+    def calc_points(self):
         if len(self.pos) != 0:  #This should never happen but since im working on this I want to warn myself if I fuck up
             raise Exception("Catmull was calculated twice!")
 
@@ -20,24 +20,24 @@ class Catmull(object):
                     v1 = self.points[x - 1]
                 else:
                     v1 = self.points[x]
-                
+
                 v2 = self.points[x]
-                
+
                 if x + 1 < self.order:
                     v3 = self.points[x + 1]
                 else:
                     v3 = v2.calc(1, v2.calc(-1, v1))
-                
+
                 if x + 2 < self.order:
                     v4 = self.points[x + 2]
                 else:
                     v4 = v3.calc(1, v3.calc(-1, v2))
 
-                point = getPoint([v1, v2, v3, v4], t)
+                point = get_point([v1, v2, v3, v4], t)
                 self.pos.append(point)
                 t += self.step
 
-def getPoint(p, length):
+def get_point(p, length):
     x = MathHelper.catmull([o.x for o in p], length)
     y = MathHelper.catmull([o.y for o in p], length)
     return MathHelper.Vec2(x, y)

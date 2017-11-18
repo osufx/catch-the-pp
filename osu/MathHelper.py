@@ -20,7 +20,11 @@ def Cpn(p, n):
     return out
 
 def Catmull(p, t): # WARNING:   Worst math formula incomming
-    return 0.5 * ( (2 * p[1]) + (-p[0] + p[2]) * t + (2 * p[0] - 5 * p[1] + 4 * p[2] - p[3]) * pow(t, 2) + (-p[0] + 3 * p[1] - 3 * p[2] + p[3]) * pow(t, 3) )
+    return 0.5 * (
+        (2 * p[1]) +
+        (-p[0] + p[2]) * t +
+        (2 * p[0] - 5 * p[1] + 4 * p[2] - p[3]) * pow(t, 2) +
+        (-p[0] + 3 * p[1] - 3 * p[2] + p[3]) * pow(t, 3))
 
 class Vec2(object):
     def __init__(self, x, y):

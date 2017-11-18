@@ -16,7 +16,7 @@ else:
 
 difficulty = Difficulty(beatmap, 0)
 print("Calculation:")
-print("Stars: {}, PP: {}, MaxCombo: {}\n".format(difficulty.starRating, calculatePP(difficulty, 1, beatmap.GetObjectCount(), 0), beatmap.GetObjectCount()))
+print("Stars: {}, PP: {}, MaxCombo: {}\n".format(difficulty.star_rating, calculatePP(difficulty, 1, beatmap.object_count, 0), beatmap.object_count))
 
 print("Wanted values:")
 print("Stars: 7.4, PP: 784.33, MaxCombo: 2806")

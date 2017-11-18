@@ -5,72 +5,72 @@ class DifficultyObject(object):
         """
         Object that holds strain value etc.
 
-        Handled in Difficulty.CalculateStrainValues & Difficulty.UpdateHyperdashDistance. 
+        Handled in Difficulty.CalculateStrainValues & Difficulty.UpdateHyperdash_distance.
         Used in Difficulty.CalculateDifficulty
         """
-        def __init__(self, hitObject, playerWidth):
+        def __init__(self, hitobject, player_width):
             """
             Hitobject wrapper to do calculation with.
 
-            hitObject   -- Hitobject to wrap around (basic)
-            playerWidth -- Catcher width    (after determined by active mods)
+            hitobject   -- Hitobject to wrap around (basic)
+            player_width -- Catcher width    (after determined by active mods)
             """
             self.strain = 1
             self.offset = 0
-            self.lastMovement = 0
-            self.hitObject = hitObject
-            self.errorMargin = constants.ABSOLUTE_PLAYER_POSITIONING_ERROR
-            self.playerWidth = playerWidth
-            self.scaledPosition = self.hitObject.x * (constants.NORMALIZED_HITOBJECT_RADIUS / self.playerWidth)
-            self.hyperdashDistance = 0
+            self.last_movement = 0
+            self.hitobject = hitobject
+            self.error_margin = constants.ABSOLUTE_PLAYER_POSITIONING_ERROR
+            self.player_width = player_width
+            self.scaled_position = self.hitobject.x * (constants.NORMALIZED_HITOBJECT_RADIUS / self.player_width)
+            self.hyperdash_distance = 0
             self.hyperdash = False
 
         def CalculateStrain(self, last, timeRate):
             """
-            Calculate strain value by refering last object. 
-            (and sets offset & lastMovement info)
+            Calculate strain value by refering last object.
+            (and sets offset & last_movement info)
 
             last        -- Previous hitobject
             timerate    -- Timescale from enabled mods
             """
-            time = (self.hitObject.time - last.hitObject.time) / timeRate
+            time = (self.hitobject.time - last.hitobject.time) / timeRate
             decay = pow(constants.DECAY_BASE, time / 1000)
 
-            self.offset = Clamp(last.scaledPosition + last.offset,
-                self.scaledPosition - (constants.NORMALIZED_HITOBJECT_RADIUS - self.errorMargin),
-                self.scaledPosition + (constants.NORMALIZED_HITOBJECT_RADIUS - self.errorMargin)
-            ) - self.scaledPosition
+            self.offset = Clamp(last.scaled_position + last.offset,
+                self.scaled_position - (constants.NORMALIZED_HITOBJECT_RADIUS - self.error_margin),
+                self.scaled_position + (constants.NORMALIZED_HITOBJECT_RADIUS - self.error_margin)
+            ) - self.scaled_position
 
-            self.lastMovement = abs(self.scaledPosition - last.scaledPosition + self.offset - last.offset)
+            self.last_movement = abs(self.scaled_position - last.scaled_position + self.offset - last.offset)
 
-            addition = pow(self.lastMovement, 1.3) / 500
+            addition = pow(self.last_movement, 1.3) / 500
 
-            if self.scaledPosition < last.scaledPosition:
-                self.lastMovement *= -1
-            
-            additionBonus = 0
-            sqrtTime = pow(max(time, 25), 0.5)
+            if self.scaled_position < last.scaled_position:
+                self.last_movement *= -1
 
-            if abs(self.lastMovement) > 0.1:
-                if abs(last.lastMovement) > 0.1 and Sign(self.lastMovement) != Sign(last.lastMovement):
-                    bonus = constants.DIRECTION_CHANGE_BONUS / sqrtTime
-                    bonusFactor = min(self.errorMargin, abs(self.lastMovement)) / self.errorMargin
+            addition_bonus = 0
+            sqrt_time = pow(max(time, 25), 0.5)
 
-                    addition += bonus * bonusFactor
+            if abs(self.last_movement) > 0.1:
+                if abs(last.last_movement) > 0.1 and Sign(self.last_movement) != Sign(last.last_movement):
+                    bonus = constants.DIRECTION_CHANGE_BONUS / sqrt_time
+                    bonus_factor = min(self.error_margin, abs(self.last_movement)) / self.error_margin
 
-                    if last.hyperdashDistance <= 10:
-                        additionBonus += 0.3 * bonusFactor
-                
-                addition += 7.5 * min(abs(self.lastMovement), constants.NORMALIZED_HITOBJECT_RADIUS * 2) / (constants.NORMALIZED_HITOBJECT_RADIUS * 6) / sqrtTime
+                    addition += bonus * bonus_factor
 
-            if last.hyperdashDistance <= 10:
+                    if last.hyperdash_distance <= 10:
+                        addition_bonus += 0.3 * bonus_factor
+
+                addition += 7.5 * min(abs(self.last_movement), constants.NORMALIZED_HITOBJECT_RADIUS * 2) / (constants.NORMALIZED_HITOBJECT_RADIUS * 6) / sqrt_time
+
+            if last.hyperdash_distance <= 10:
                 if not last.hyperdash:
-                    additionBonus += 1
+                    addition_bonus += 1
                 else:
                     self.offset = 0
-                
-                addition *= 1 + additionBonus * ((10 - last.hyperdashDistance) / 10)
-            
+
+                addition *= 1 + addition_bonus * ((10 - last.hyperdash_distance) / 10)
+
             addition *= 850 / max(time, 25)
             self.strain = last.strain * decay + addition
 
@@ -78,7 +78,7 @@ class Difficulty(object):
     """
     Difficulty object for calculating star rating.
 
-    Stars: self.starRating
+    Stars: self.star_rating
     """
 
     def __init__(self, beatmap, mods):
@@ -92,23 +92,23 @@ class Difficulty(object):
         self.beatmap = beatmap
         self.mods = mods
 
-        self.DifficultyObjects = []
+        self.difficulty_objects = []
 
         #Do the calculation
-        self.timeRate = self.getTimeRate()
-        self.playerWidth = 305 / 1.6 * ((102.4 * (1 - 0.7 * self.AdjustDifficulty(self.beatmap.difficulty["CircleSize"], self.mods))) / 128) * 0.7
+        self.time_rate = self.getTimeRate()
+        self.player_width = 305 / 1.6 * ((102.4 * (1 - 0.7 * self.AdjustDifficulty(self.beatmap.difficulty["CircleSize"], self.mods))) / 128) * 0.7
 
-        for hitObject in self.beatmap.hitObjects:
-            self.DifficultyObjects.append(DifficultyObject(hitObject, self.playerWidth * 0.4))
-        
-        self.UpdateHyperdashDistance()
+        for hitobject in self.beatmap.hitobjects:
+            self.difficulty_objects.append(DifficultyObject(hitobject, self.player_width * 0.4))
+
+        self.UpdateHyperdash_distance()
 
         #Sort the list so its sorted by time (Incase it somehow isnt)
-        self.DifficultyObjects.sort(key=lambda o: o.hitObject.time)
+        self.difficulty_objects.sort(key=lambda o: o.hitobject.time)
 
         self.CalculateStrainValues()
 
-        self.starRating = pow(self.CalculateDifficulty(), 0.5) * constants.STAR_SCALING_FACTOR
+        self.star_rating = pow(self.CalculateDifficulty(), 0.5) * constants.STAR_SCALING_FACTOR
 
     def AdjustDifficulty(self, diff, mods):
         """
@@ -122,7 +122,7 @@ class Difficulty(object):
             diff = max(0, diff / 2)
         if mods & 1 << 4 > 0:       #HR
             diff = min(10, diff * 1.3)
-        
+
         return (diff - 5) / 5
 
     def getTimeRate(self):
@@ -137,98 +137,98 @@ class Difficulty(object):
             rate += 0.5
         elif self.mods & 1 << 8 > 0:    #HT
             rate -= 0.25
-        
+
         return rate
 
-    def UpdateHyperdashDistance(self):
+    def UpdateHyperdash_distance(self):
         """
-        Update hyperdashDistance value for every hitobject in the beatmap.
+        Update hyperdash_distance value for every hitobject in the beatmap.
         """
-        lastDirection = 0
-        playerWidthHalf = self.playerWidth / 2
-        last = playerWidthHalf
+        last_direction = 0
+        player_width_half = self.player_width / 2
+        last = player_width_half
 
-        for i in range(len(self.DifficultyObjects) - 1):
-            current = self.DifficultyObjects[i]
-            next = self.DifficultyObjects[i + 1]
+        for i in range(len(self.difficulty_objects) - 1):
+            current = self.difficulty_objects[i]
+            next = self.difficulty_objects[i + 1]
 
-            if next.hitObject.x > current.hitObject.x:
+            if next.hitobject.x > current.hitobject.x:
                 direction = 1
             else:
                 direction = -1
-            
-            timeToNext = next.hitObject.time - current.hitObject.time - 4.166667 #ms for 60fps divided by 4
-            distanceToNext = abs(next.hitObject.x - current.hitObject.x) 
-            if lastDirection == direction:
-                distanceToNext -= last
+
+            time_to_next = next.hitobject.time - current.hitobject.time - 4.166667 #ms for 60fps divided by 4
+            distance_to_next = abs(next.hitobject.x - current.hitobject.x) 
+            if last_direction == direction:
+                distance_to_next -= last
             else:
-                distanceToNext -= playerWidthHalf
-            
-            if timeToNext < distanceToNext:
+                distance_to_next -= player_width_half
+
+            if time_to_next < distance_to_next:
                 current.hyperdash = True
-                last = playerWidthHalf
+                last = player_width_half
             else:
-                current.hyperdashDistance = timeToNext - distanceToNext
-                last = Clamp(current.hyperdashDistance, 0, playerWidthHalf)
-            
-            lastDirection = direction
+                current.hyperdash_distance = time_to_next - distance_to_next
+                last = Clamp(current.hyperdash_distance, 0, player_width_half)
+
+            last_direction = direction
     
     def CalculateStrainValues(self):
         """
         Calculate strain values for every hitobject.
 
-        It does this by using distance, decay & previous hitobject strain value. 
+        It does this by using distance, decay & previous hitobject strain value.
         Timerate also effects this.
         """
-        current = self.DifficultyObjects[0]
+        current = self.difficulty_objects[0]
 
         index = 1
-        while index < len(self.DifficultyObjects):
-            next = self.DifficultyObjects[index]
-            next.CalculateStrain(current, self.timeRate)
+        while index < len(self.difficulty_objects):
+            next = self.difficulty_objects[index]
+            next.CalculateStrain(current, self.time_rate)
             current = next
             index += 1
 
     def CalculateDifficulty(self):
         """
-        Calculates the difficulty for this beatmap. 
-        This is used in the final function to calculate star rating. 
+        Calculates the difficulty for this beatmap.
+        This is used in the final function to calculate star rating.
         DISCLAIMER: This is not the final star rating value.
-        
+
         return -- difficulty
         """
-        strainStep = constants.STRAIN_STEP * self.timeRate
-        highestStrains = []
-        interval = strainStep
-        maxStrain = 0
+        strain_step = constants.STRAIN_STEP * self.time_rate
+        highest_strains = []
+        interval = strain_step
+        max_strain = 0
 
         last = None
 
-        for difficultyObject in self.DifficultyObjects:
-            while difficultyObject.hitObject.time > interval:
-                highestStrains.append(maxStrain)
+        for difficulty_object in self.difficulty_objects:
+            while difficulty_object.hitobject.time > interval:
+                highest_strains.append(max_strain)
 
                 if last == None:
-                    maxStrain = 0
+                    max_strain = 0
                 else:
-                    decay = pow(constants.DECAY_BASE, (interval - last.hitObject.time) / 1000)
-                    maxStrain = last.strain * decay
-                
-                interval += strainStep
-            
-            if difficultyObject.strain > maxStrain:
-                maxStrain = difficultyObject.strain
-            
-            last = difficultyObject
-        
+                    decay = pow(constants.DECAY_BASE, (interval - last.hitobject.time) / 1000)
+                    max_strain = last.strain * decay
+
+                interval += strain_step
+
+            if difficulty_object.strain > max_strain:
+                max_strain = difficulty_object.strain
+
+            last = difficulty_object
+
         difficulty = 0
         weight = 1
 
         #Sort from high to low strain
-        highestStrains.sort(key=int, reverse=True)
+        highest_strains.sort(key=int, reverse=True)
 
-        for strain in highestStrains:
+        for strain in highest_strains:
             difficulty += weight * strain
             weight *= constants.DECAY_WEIGHT
-        
+
         return difficulty

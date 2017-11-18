@@ -10,14 +10,14 @@ def calculatePP(diff, accuracy, combo, miss):
     miss        -- Amount of misses during the play (Int)
     return      -- Total pp for gameplay
     """
-    pp = pow(((5 * diff.starRating / 0.0049) - 4), 2) / 100000
-    lengthBonus = 0.95 + 0.4 * min(1, combo / 3000)
+    pp = pow(((5 * diff.star_rating / 0.0049) - 4), 2) / 100000
+    length_bonus = 0.95 + 0.4 * min(1, combo / 3000)
     if combo > 3000:
-        lengthBonus += math.log10(combo / 3000) * 0.5
+        length_bonus += math.log10(combo / 3000) * 0.5
     
-    pp *= lengthBonus
+    pp *= length_bonus
     pp *= pow(0.97, miss)
-    pp *= min(pow(combo, 0.8) / pow(diff.beatmap.objectCount, 0.8), 1)
+    pp *= min(pow(combo, 0.8) / pow(diff.beatmap.object_count, 0.8), 1)
 
     if diff.beatmap.difficulty["ApproachRate"] > 9:
         pp *= 1 + 0.1 * (diff.beatmap.difficulty["ApproachRate"] - 9)
@@ -28,7 +28,7 @@ def calculatePP(diff, accuracy, combo, miss):
         pp *= 1.05 + 0.075 * (10 - min(10, diff.beatmap.difficulty["ApproachRate"]))
     
     if diff.mods & 1 << 10 > 0:    #FL
-        pp *= 1.35 * lengthBonus
+        pp *= 1.35 * length_bonus
     
     pp *= pow(accuracy, 5.5)
 

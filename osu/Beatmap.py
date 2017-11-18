@@ -1,37 +1,35 @@
 from osu.HitObject import *
 from osu.MathHelper import Vec2
 
-import json
-
 class Beatmap(object):
     """
     Beatmap object for beatmap parsing and handling
     """
 
-    def __init__(self, fileName):
+    def __init__(self, file_name):
         """
-        fileName -- Directory for beatmap file (.osu)
+        file_name -- Directory for beatmap file (.osu)
         """
-        self.fileName = fileName
+        self.file_name = file_name
         self.header = -1
         self.difficulty = {}
-        self.hitObjects = []
+        self.hitobjects = []
         self.ParseBeatmap()
-        self.objectCount = self.GetObjectCount()
+        self.object_count = self.GetObjectCount()
     
     def ParseBeatmap(self):
         """
         Parses beatmap file line by line by passing each line into ParseLine.
         """
-        with open(self.fileName) as fileStream:
-            for line in fileStream:
+        with open(self.file_name) as file_stream:
+            for line in file_stream:
                 self.ParseLine(line.replace("\n", ""))
 
     def ParseLine(self, line):
         """
         Parse a beatmapfile line.
 
-        Handles lines that are required for our use case (Difficulty, TimingPoints & HitObjects), 
+        Handles lines that are required for our use case (Difficulty, TimingPoints & hitobjects), 
         everything else is skipped.
         """
         if len(line) < 1:
@@ -58,7 +56,7 @@ class Beatmap(object):
             #print("NOT IMPLEMENTED: (TimingPoint) " + line)
             a = 1 #Placeholder
         elif self.header == 2:
-            self.HandleHitObject(line)
+            self.HandleHitobject(line)
     
     def HandleDifficultyPropperty(self, propperty):
         """
@@ -67,29 +65,29 @@ class Beatmap(object):
         prop = propperty.split(":")
         self.difficulty[prop[0]] = float(prop[1])
 
-    def HandleHitObject(self, line):
+    def HandleHitobject(self, line):
         """
-        Puts every hitobject into the hitObjects array.
+        Puts every hitobject into the hitobjects array.
 
-        Creates HitObjects, HitObjectSliders or skip depending on the given data.
+        Creates hitobjects, hitobject_sliders or skip depending on the given data.
         We skip everything that is not important for us for our use case (Spinners)
         """
-        splitObject = line.split(",")
-        hitObject = HitObject(int(splitObject[0]), int(splitObject[1]), int(splitObject[2]), int(splitObject[3]))
+        split_object = line.split(",")
+        hitobject = HitObject(int(split_object[0]), int(split_object[1]), int(split_object[2]), int(split_object[3]))
 
-        if not (1 & hitObject.type > 0 or 2 & hitObject.type > 0):  #We only want sliders and circles as spinners are random bannanas etc.
+        if not (1 & hitobject.type > 0 or 2 & hitobject.type > 0):  #We only want sliders and circles as spinners are random bannanas etc.
             return
-        
-        if 2 & hitObject.type:  #Slider
-            curveSplit = splitObject[6].split("|")
-            curvePoints = []
-            for i in range(1, len(curveSplit)):
-                vectorSplit = curveSplit[i].split(":")
-                vector = Vec2(int(vectorSplit[0]), int(vectorSplit[1]))
-                curvePoints.append(vector)
-            hitObject = HitObjectSlider(hitObject, curveSplit[0], curvePoints, int(splitObject[6]), float(splitObject[7]))
 
-        self.hitObjects.append(hitObject)
+        if 2 & hitobject.type:  #Slider
+            curve_split = split_object[6].split("|")
+            curve_points = []
+            for i in range(1, len(curve_split)):
+                vector_split = curve_split[i].split(":")
+                vector = Vec2(int(vector_split[0]), int(vector_split[1]))
+                curve_points.append(vector)
+            hitobject = HitObjectSlider(hitobject, curve_split[0], curve_points, int(split_object[6]), float(split_object[7]))
+
+        self.hitobjects.append(hitobject)
 
     def GetObjectCount(self):
         """
@@ -98,6 +96,6 @@ class Beatmap(object):
         return -- total hitobjects for parsed beatmap
         """
         count = 0
-        for hitObject in self.hitObjects:
-            count += hitObject.GetPoints()
+        for hitobject in self.hitobjects:
+            count += hitobject.GetPoints()
         return count

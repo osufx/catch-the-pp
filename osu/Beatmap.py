@@ -13,6 +13,7 @@ class Beatmap(object):
         self.file_name = file_name
         self.header = -1
         self.difficulty = {}
+        self.timing_points = {}
         self.hitobjects = []
         self.parse_beatmap()
         self.object_count = self.get_object_count()
@@ -52,9 +53,7 @@ class Beatmap(object):
         if self.header == 0:
             self.handle_difficulty_propperty(line)
         elif self.header == 1:
-            #Cry more
-            #print("NOT IMPLEMENTED: (TimingPoint) " + line)
-            a = 1 #Placeholder
+            self.handle_timing_point(line)
         elif self.header == 2:
             self.handle_hitobject(line)
     
@@ -64,6 +63,18 @@ class Beatmap(object):
         """
         prop = propperty.split(":")
         self.difficulty[prop[0]] = float(prop[1])
+
+    def handle_timing_point(self, timing_point):
+        """
+        Formats timing points used for slider velocity changes,
+        and store them into self.timing_points dict.
+        """
+        timing_point_split = timing_point.split(",")
+        timing_point_time = int(timing_point_split[0])
+        timing_point_focus = timing_point_split[1]
+
+        if timing_point_focus.startswith("-"):  #If not then its not a slider velocity modifier
+            self.timing_points[timing_point_time] = -100 / float(timing_point_focus) #Convert to normalized value and store
 
     def handle_hitobject(self, line):
         """
@@ -79,13 +90,20 @@ class Beatmap(object):
             return
 
         if 2 & hitobject.type:  #Slider
+            scale_velocity = 1
+            for key in self.timing_points.keys():
+                if key <= hitobject.time:
+                    scale_velocity = self.timing_points[key]
+                else:
+                    break
+            scaled_velocity = self.difficulty["SliderMultiplier"] * scale_velocity
             curve_split = split_object[5].split("|")
             curve_points = []
             for i in range(1, len(curve_split)):
                 vector_split = curve_split[i].split(":")
                 vector = Vec2(int(vector_split[0]), int(vector_split[1]))
                 curve_points.append(vector)
-            hitobject = HitObjectSlider(hitobject, curve_split[0], curve_points, int(split_object[6]), float(split_object[7]))
+            hitobject = HitObjectSlider(hitobject, curve_split[0], curve_points, int(split_object[6]), float(split_object[7]), scaled_velocity)
 
         self.hitobjects.append(hitobject)
 

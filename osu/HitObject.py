@@ -11,7 +11,7 @@ class HitObject(object):
         return 1
 
 class HitObjectSlider(object):
-    def __init__(self, hitobject, slider_type, curve_points, repeat, pixel_length):
+    def __init__(self, hitobject, slider_type, curve_points, repeat, pixel_length, scaled_velocity):
         self.x = hitobject.x #Just no (Do this propperly or whatever...)
         self.time = hitobject.time #Just no
         self.hitobject = hitobject
@@ -19,6 +19,7 @@ class HitObjectSlider(object):
         self.curve_points = curve_points
         self.repeat = repeat
         self.pixel_length = pixel_length
+        self.scaled_velocity = scaled_velocity
         self.calculate_slider()
 
     def get_points(self):        #This is used to get the total amount of hitobjects
@@ -29,7 +30,7 @@ class HitObjectSlider(object):
         return val
 
     def calculate_slider(self):
-        print("Slidertype: {}".format(self.slider_type))    #DEBUG
+        print("slider_type: {}, scaled_velocity: {}".format(self.slider_type, self.scaled_velocity))    #DEBUG
         if self.slider_type == "L":     #Linear
             return
         elif self.slider_type == "P":   #Perfect

@@ -38,6 +38,6 @@ class Catmull(object):
                 t += self.step
 
 def getPoint(p, length):
-    x = MathHelper.Catmull([o.x for o in p], length)
-    y = MathHelper.Catmull([o.y for o in p], length)
+    x = MathHelper.catmull([o.x for o in p], length)
+    y = MathHelper.catmull([o.y for o in p], length)
     return MathHelper.Vec2(x, y)

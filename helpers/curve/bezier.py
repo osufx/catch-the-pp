@@ -20,7 +20,7 @@ class Bezier(object):
             y = 0
             
             for p in range(n + 1):
-                a = MathHelper.Cpn(p, n) * pow((1 - i), (n - p)) * pow(i, p)
+                a = MathHelper.cpn(p, n) * pow((1 - i), (n - p)) * pow(i, p)
                 x += a * self.points[p].x
                 y += a * self.points[p].y
             

@@ -1,4 +1,5 @@
 from osu.MathHelper import Vec2, point_on_line
+from helpers import curves
 
 class HitObject(object):
     def __init__(self, x, y, time, t):
@@ -12,8 +13,10 @@ class HitObject(object):
 
 class HitObjectSlider(object):
     def __init__(self, hitobject, slider_type, curve_points, repeat, pixel_length, scaled_velocity):
-        self.x = hitobject.x #Just no (Do this propperly or whatever...)
-        self.time = hitobject.time #Just no
+        self.x = hitobject.x
+        self.y = hitobject.y
+        self.time = hitobject.time
+        self.type = hitobject.type
         self.hitobject = hitobject
         self.slider_type = slider_type
         self.curve_points = curve_points
@@ -32,12 +35,22 @@ class HitObjectSlider(object):
     def calculate_slider(self):
         print("slider_type: {}, scaled_velocity: {}".format(self.slider_type, self.scaled_velocity))    #DEBUG
         if self.slider_type == "L":     #Linear
-            return
+            path = curves.Linear([Vec2(self.x, self.y)] + self.curve_points).pos
+            end = point_on_line(path[0], path[1], self.pixel_length)
         elif self.slider_type == "P":   #Perfect
             return
         elif self.slider_type == "B":   #Bezier
-            return
+            curve = curves.Bezier([Vec2(self.x, self.y)] + self.curve_points, True)
+            path = curve.pos
+            if len(path) == 2:
+                end = point_on_line(path[0], path[1], self.pixel_length)
+            else:
+                end = curve.point_at_distance(self.pixel_length)
+
         elif self.slider_type == "C":   #Catmull
-            return
+            path = curves.Catmull([Vec2(self.x, self.y)] + self.curve_points).pos
         else:
             raise Exception("Slidertype not supported! ({})".format(self.slider_type))
+        
+        #Place slider_ticks
+

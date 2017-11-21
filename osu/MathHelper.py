@@ -1,3 +1,5 @@
+import math
+
 def clamp(value, mn, mx):
     return min(max(mn, value), mx)
 
@@ -33,6 +35,82 @@ def point_on_line(p0, p1, length):
     x = (n * p0.x + length * p1.x) / full_length
     y = (n * p0.y + length * p1.y) / full_length
     return Vec2(x, y)
+
+def angle_from_points(p0, p1):
+    return math.atan2(p1.y - p0.y, p1.x - p0.x)
+
+def distance_from_points(array):
+    distance = 0
+
+    for i in range(1, len(array)):
+        distance += array[i].distance(array[i - 1])
+
+    return distance
+
+def cart_from_pol(r, t):
+    x = (r * math.cos(t))
+    y = (r * math.sin(t))
+
+    return Vec2(x, y)
+
+def point_at_distance(array, distance, return_extra = False): #TODO: Optimize...
+    i = 0
+    current_distance = 0
+
+    if len(array) < 2:
+        if return_extra:
+            return [Vec2(0, 0), 0, 0]
+        else:
+            return Vec2(0, 0)
+
+    if distance == 0:
+        angle = angle_from_points(array[0], array[1])
+        if return_extra:
+            return [array[0], angle, 0]
+        else:
+            return array[0]
+
+    if distance_from_points(array) <= distance:
+        angle = angle_from_points(array[len(array) - 2], array[len(array) - 1])
+        if return_extra:
+            return [array[len(array) - 1].x,
+                    array[len(array) - 1].y,
+                    angle,
+                    len(array) - 2]
+        else:
+            return array[len(array) - 1]
+
+    for i in range(len(array) - 2):
+        x = (array[i].x - array[i + 1].x)
+        y = (array[i].y - array[i + 1].y)
+
+        new_distance = (math.sqrt(x * x + y * y))
+        current_distance += new_distance
+
+        if distance <= current_distance:
+            break
+
+    current_distance -= new_distance
+
+    if distance == current_distance:
+        angle = angle_from_points(array[i], array[i + 1])
+        if return_extra:
+            return [array[i], angle, i]
+        else:
+            return array[i]
+    else:
+        angle = angle_from_points(array[i], array[i + 1])
+        cart = cart_from_pol((distance - current_distance), angle)
+
+        if array[i].x > array[i + 1].x:
+            coord = [(array[i].x - cart.x), (array[i].y - cart.y)]
+        else:
+            coord = [(array[i].x + cart.y), (array[i].y + cart.y)]
+    
+    if return_extra:
+        return [coord, angle, i]
+    else:
+        return coord
 
 class Vec2(object):
     def __init__(self, x, y):

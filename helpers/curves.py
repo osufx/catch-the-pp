@@ -1,3 +1,4 @@
+import math
 from osu import MathHelper
 
 class Linear(object):   #Because it made sense at the time...
@@ -31,13 +32,13 @@ class Bezier(object):
             point = MathHelper.Vec2(x, y)
             self.pos.append(point)
             i += self.step
-    
+
     def point_at_distance(self, length):
         return {
             0: False,
             1: self.points[0],
         }.get(self.order, self.rec(length))
-    
+
     def rec(self, length):
         return MathHelper.point_at_distance(self.pos, length)
 
@@ -77,7 +78,51 @@ class Catmull(object):  #Yes... I cry deep down on the inside aswell
                 self.pos.append(point)
                 t += self.step
 
+    def point_at_distance(self, length):
+        return {
+            0: False,
+            1: self.points[0],
+        }.get(self.order, self.rec(length))
+
+    def rec(self, length):
+        return MathHelper.point_at_distance(self.pos, length)
+
+class Perfect(object):
+    def __init__(self, points):
+        self.points = points
+        self.setup_path()
+    
+    def setup_path(self):
+        self.cx, self.cy, self.radius = get_circum_circle(self.points)
+        if is_left(self.points):
+            self.radius *= -1
+    
+    def point_at_distance(self, length):
+        radians = length / self.radius
+        return rotate(self.cx, self.cy, self.points[0], radians)
+
 def get_point(p, length):
     x = MathHelper.catmull([o.x for o in p], length)
     y = MathHelper.catmull([o.y for o in p], length)
     return MathHelper.Vec2(x, y)
+
+def get_circum_circle(p):
+    d = 2 * (p[0].x * (p[1].y - p[2].y) + p[1].x * (p[2].y - p[0].y) + p[2].x * (p[0].y - p[1].y))
+
+    ux = ((pow(p[0].x, 2) + pow(p[0].y, 2)) * (p[1].y - p[2].y) + (pow(p[1].x, 2) + pow(p[1].y, 2)) * (p[2].y - p[0].y) + (pow(p[2].x, 2) + pow(p[2].y, 2)) * (p[0].y - p[1].y)) / d
+    uy = ((pow(p[0].x, 2) + pow(p[0].y, 2)) * (p[2].x - p[1].x) + (pow(p[1].x, 2) + pow(p[1].y, 2)) * (p[0].x - p[2].x) + (pow(p[2].x, 2) + pow(p[2].y, 2)) * (p[1].x - p[0].x)) / d
+
+    px = ux - p[0].x
+    py = uy - p[0].y
+    r = pow(pow(px, 2) + pow(py, 2), 0.5)
+
+    return ux, uy, r
+
+def is_left(p):
+    return ((p[1].x - p[0].x) * (p[2].y - p[0].y) - (p[1].y - p[0].y) * (p[2].x - p[0].x)) < 0
+
+def rotate(cx, cy, p, radians):
+    cos = math.cos(radians)
+    sin = math.sin(radians)
+
+    return MathHelper.Vec2((cos * (p.x - cx)) - (sin * (p.y - cy)) + cx, (sin * (p.x - cx)) + (cos * (p.y - cy)) + cy)

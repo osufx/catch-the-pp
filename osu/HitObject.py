@@ -19,9 +19,11 @@ class HitObjectSlider(object):
         self.type = hitobject.type
         self.hitobject = hitobject
         self.slider_type = slider_type
-        self.curve_points = curve_points
+        self.curve_points = [Vec2(self.x, self.y)] + curve_points
         self.repeat = repeat
         self.pixel_length = pixel_length
+
+        self.slider_ticks = 0
         self.scaled_velocity = scaled_velocity
         self.calculate_slider()
 
@@ -34,23 +36,40 @@ class HitObjectSlider(object):
 
     def calculate_slider(self):
         print("slider_type: {}, scaled_velocity: {}".format(self.slider_type, self.scaled_velocity))    #DEBUG
-        if self.slider_type == "L":     #Linear
-            path = curves.Linear([Vec2(self.x, self.y)] + self.curve_points).pos
-            end = point_on_line(path[0], path[1], self.pixel_length)
-        elif self.slider_type == "P":   #Perfect
-            return
-        elif self.slider_type == "B":   #Bezier
-            curve = curves.Bezier([Vec2(self.x, self.y)] + self.curve_points, True)
-            path = curve.pos
-            if len(path) == 2:
-                end = point_on_line(path[0], path[1], self.pixel_length)
-            else:
-                end = curve.point_at_distance(self.pixel_length)
 
+        if self.slider_type == "P" and len(self.curve_points) > 3:
+            self.slider_type = "B"
+        elif len(self.curve_points) == 2:
+            self.end = point_on_line(self.curve_points[0], self.curve_points[1], self.pixel_length)
+
+
+        #Make path
+        if self.slider_type == "L":     #Linear
+            path = curves.Linear(self.curve_points).pos
+        elif self.slider_type == "P":   #Perfect
+            curve = curves.Perfect(self.curve_points)
+        elif self.slider_type == "B":   #Bezier
+            curve = curves.Bezier(self.curve_points, True)
+            path = curve.pos
         elif self.slider_type == "C":   #Catmull
-            path = curves.Catmull([Vec2(self.x, self.y)] + self.curve_points).pos
+            curve = curves.Catmull(self.curve_points).pos
+            path = curve.pos
         else:
             raise Exception("Slidertype not supported! ({})".format(self.slider_type))
-        
+
+        #Make end
+        if not hasattr(self, 'end'):
+            if self.slider_type == "L":     #Linear
+                self.end = point_on_line(path[0], path[1], self.pixel_length)
+            elif self.slider_type == "P":   #Perfect
+                self.end = curve.point_at_distance(self.pixel_length)
+            elif self.slider_type == "B":   #Bezier
+                self.end = curve.point_at_distance(self.pixel_length)
+            elif self.slider_type == "C":   #Catmull
+                self.end = curve.point_at_distance(self.pixel_length)
+            else:
+                raise Exception("Slidertype not supported! ({})".format(self.slider_type))
+
         #Place slider_ticks
 
+        #Place end_point

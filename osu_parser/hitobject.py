@@ -46,7 +46,7 @@ class HitObject(object):
 
             self.ticks = []
 
-            self.calc_slider(True)
+            self.calc_slider()
     
     def calc_slider(self, calc_path = False):
         #Fix broken objects

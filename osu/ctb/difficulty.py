@@ -92,13 +92,21 @@ class Difficulty(object):
         self.beatmap = beatmap
         self.mods = mods
 
+        self.hitobjects_with_ticks = []
+        for hitobject in self.beatmap.hitobjects:
+            self.hitobjects_with_ticks.append(hitobject)
+            if 2 & hitobject.type:
+                for tick in hitobject.ticks:
+                    self.hitobjects_with_ticks.append(tick)
+                self.hitobjects_with_ticks.append(hitobject.end)
+
         self.difficulty_objects = []
 
         #Do the calculation
         self.time_rate = self.get_time_rate()
         self.player_width = 305 / 1.6 * ((102.4 * (1 - 0.7 * self.adjust_difficulty(self.beatmap.difficulty["CircleSize"], self.mods))) / 128) * 0.7
 
-        for hitobject in self.beatmap.hitobjects:
+        for hitobject in self.hitobjects_with_ticks:
             self.difficulty_objects.append(DifficultyObject(hitobject, self.player_width * 0.4))
 
         self.update_hyperdash_distance()

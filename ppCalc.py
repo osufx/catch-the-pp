@@ -17,7 +17,7 @@ def calculate_pp(diff, accuracy, combo, miss):
 
     pp *= length_bonus
     pp *= pow(0.97, miss)
-    pp *= min(pow(combo, 0.8) / pow(diff.beatmap.object_count, 0.8), 1)
+    pp *= min(pow(combo, 0.8) / pow(diff.beatmap.max_combo, 0.8), 1)
 
     if diff.beatmap.difficulty["ApproachRate"] > 9:
         pp *= 1 + 0.1 * (diff.beatmap.difficulty["ApproachRate"] - 9)

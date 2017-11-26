@@ -1,5 +1,5 @@
 import constants
-from osu.MathHelper import clamp, sign
+from osu_parser.mathhelper import clamp, sign
 
 class DifficultyObject(object):
         """

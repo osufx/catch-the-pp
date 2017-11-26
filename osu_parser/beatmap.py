@@ -15,7 +15,8 @@ class Beatmap(object):
         self.header = -1
         self.difficulty = {}
         self.timing_points = {
-            "mpb": {},  #Raw code
+            "raw_bpm": {},  #Raw bpm modifier code
+            "raw_spm": {}, #Raw speed modifier code
             "bpm": {},  #Beats pr minute
             "spm": {}   #Speed modifier
         }
@@ -84,10 +85,10 @@ class Beatmap(object):
 
         if timing_point_focus.startswith("-"):  #If not then its not a slider velocity modifier
             self.timing_points["spm"][timing_point_time] = -100 / float(timing_point_focus) #Convert to normalized value and store
-            self.timing_points["mpb"][timing_point_time] = float(timing_point_focus)
+            self.timing_points["raw_spm"][timing_point_time] = float(timing_point_focus)
         else:
             self.timing_points["bpm"][timing_point_time] = 60000 / float(timing_point_focus)#^
-            #self.timing_points["mpb"][timing_point_time] = float(timing_point_focus)
+            self.timing_points["raw_bpm"][timing_point_time] = float(timing_point_focus)
 
     def handle_hitobject(self, line):
         """
@@ -109,14 +110,9 @@ class Beatmap(object):
 
             time_point = self.get_timing_point_all(time)
 
-            px_per_beat = self.difficulty["SliderTickRate"] * 100
-
-            if self.version >= 8:
-                px_per_beat *= time_point["spm"]
-
             tick_distance = (100 * self.difficulty["SliderMultiplier"]) / self.difficulty["SliderTickRate"]
             if self.version >= 8:
-                tick_distance /= mathhelper.clamp(-time_point["mpb"], 10, 1000) / 100
+                tick_distance /= mathhelper.clamp(-time_point["raw_spm"], 10, 1000) / 100
 
             curve_split = split_object[5].split("|")
             curve_points = []
@@ -124,7 +120,7 @@ class Beatmap(object):
                 vector_split = curve_split[i].split(":")
                 vector = mathhelper.Vec2(int(vector_split[0]), int(vector_split[1]))
                 curve_points.append(vector)
-            hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type, curve_split[0], curve_points, repeat, pixel_length, time_point, px_per_beat, self.difficulty, tick_distance)
+            hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type, curve_split[0], curve_points, repeat, pixel_length, time_point, self.difficulty, tick_distance)
         else:
             hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type)
 
@@ -136,10 +132,11 @@ class Beatmap(object):
         Returns a object of all current timing types
 
         time -- timestamp
-        return -- {"mpb": Float, "bpm": Float, "spm": Float}
+        return -- {"raw_bpm": Float, "raw_spm": Float, "bpm": Float, "spm": Float}
         """
         types = {
-            "mpb": -100,
+            "raw_bpm": 60000,
+            "raw_spm": -100,
             "bpm": 100,
             "spm": 1
         }   #Will return the default value if timing point were not found

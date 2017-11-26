@@ -8,7 +8,7 @@ class SliderTick(object):
         self.time = time
 
 class HitObject(object):
-    def __init__(self, x, y, time, object_type, slider_type = None, curve_points = None, repeat = 1, pixel_length = 0, timing_point = None, px_per_beat = 1, difficulty = None, tick_distance = 1):
+    def __init__(self, x, y, time, object_type, slider_type = None, curve_points = None, repeat = 1, pixel_length = 0, timing_point = None, difficulty = None, tick_distance = 1):
         """
         HitObject params for normal hitobject and sliders
 
@@ -23,7 +23,8 @@ class HitObject(object):
         repeat -- amount of repeats for the slider (+1)
         pixel_length -- length of the slider
         timing_point -- ref of current timing point for the timestamp
-        px_per_beat -- pixels per. beat
+        difficulty -- ref of beatmap difficulty
+        tick_distance -- distance betwin each slidertick
         """
         self.x = x
         self.y = y
@@ -39,19 +40,15 @@ class HitObject(object):
 
             #For slider tick calculations
             self.timing_point = timing_point
-            self.px_per_beat = px_per_beat
             self.difficulty = difficulty
             self.tick_distance = tick_distance
+            self.duration = self.timing_point["raw_bpm"] * (pixel_length / (self.difficulty["SliderMultiplier"] * self.timing_point["spm"])) / 100
 
             self.ticks = []
 
             self.calc_slider(True)
     
     def calc_slider(self, calc_path = False):
-        #Calculate slider duration
-        num_beats = (self.pixel_length * self.repeat) / self.px_per_beat
-        self.duration = math.ceil(num_beats * -self.timing_point["mpb"]) * (self.timing_point["bpm"] / 100)
-
         #Fix broken objects
         if self.slider_type == "P" and len(self.curve_points) > 3:
             self.slider_type = "B"

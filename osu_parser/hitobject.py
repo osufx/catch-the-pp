@@ -42,7 +42,7 @@ class HitObject(object):
             self.timing_point = timing_point
             self.difficulty = difficulty
             self.tick_distance = tick_distance
-            self.duration = self.timing_point["raw_bpm"] * (pixel_length / (self.difficulty["SliderMultiplier"] * self.timing_point["spm"])) / 100
+            self.duration = (self.timing_point["raw_bpm"] * (pixel_length / (self.difficulty["SliderMultiplier"] * self.timing_point["spm"])) / 100) * self.repeat
 
             self.ticks = []
 
@@ -84,15 +84,19 @@ class HitObject(object):
         #End time
         self.end_time = self.time + self.duration
 
+        end_length = self.pixel_length
+        if 1 & self.repeat == 0:
+            end_length = 0
+
         #End points
         if self.slider_type == "L":     #Linear
-            self.end = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], self.pixel_length)
+            self.end = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], end_length)
         elif self.slider_type == "P":   #Perfect
-            self.end = curve.point_at_distance(self.pixel_length)
+            self.end = curve.point_at_distance(end_length)
         elif self.slider_type == "B":   #Bezier
-            self.end = curve.point_at_distance(self.pixel_length)
+            self.end = curve.point_at_distance(end_length)
         elif self.slider_type == "C":   #Catmull
-            self.end = curve.point_at_distance(self.pixel_length)
+            self.end = curve.point_at_distance(end_length)
         else:
             raise Exception("Slidertype not supported! ({})".format(self.slider_type))
         
@@ -102,11 +106,15 @@ class HitObject(object):
         #Set slider ticks
         current_distance = self.tick_distance
         time_add = self.duration * (self.tick_distance / self.pixel_length)
-        while current_distance < self.pixel_length - 1:
+        while current_distance < self.pixel_length * self.repeat:
+            reverse_count = math.floor(current_distance / self.pixel_length)
+            final_distance = current_distance - (self.pixel_length * reverse_count)
+            if 1 & reverse_count:
+                final_distance = self.pixel_length - final_distance
             if self.slider_type == "L":     #Linear
-                point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], current_distance)
+                point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], final_distance)
             else:   #Perfect, Bezier & Catmull uses the same function
-                point = curve.point_at_distance(current_distance)
+                point = curve.point_at_distance(final_distance)
             self.ticks.append(SliderTick(point.x, point.y, self.time + time_add * (len(self.ticks) + 1)))
             current_distance += self.tick_distance
 

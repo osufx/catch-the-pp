@@ -31,7 +31,7 @@ class Bezier(object):
 
     def bezier(self, points):
         order = len(points)
-        step = 0.25 / order #Normaly 0.0025
+        step = 0.0025 / order #Normaly 0.0025
         i = 0
         n = order - 1
         while i < 1 + step:

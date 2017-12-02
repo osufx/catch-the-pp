@@ -30,7 +30,7 @@ class Beatmap(object):
         """
         Parses beatmap file line by line by passing each line into parse_line.
         """
-        with open(self.file_name) as file_stream:
+        with open(self.file_name, encoding="utf8") as file_stream:
             self.version = int(''.join(list(filter(str.isdigit, file_stream.readline()))))  #Set version
             for line in file_stream:
                 self.parse_line(line.replace("\n", ""))

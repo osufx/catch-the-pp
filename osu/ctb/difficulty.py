@@ -169,14 +169,11 @@ class Difficulty(object):
                 direction = -1
 
             time_to_next = next_object.hitobject.time - current_object.hitobject.time - 4.166667 #ms for 60fps divided by 4
-            print("{}, next_object.time: {}, current_object.time: {}, time_to_next: {}".format(i, next_object.hitobject.time, current_object.hitobject.time, time_to_next))
             distance_to_next = abs(next_object.hitobject.x - current_object.hitobject.x)
-            print("{}, next_object.x: {}, current_object.x: {}".format(i, next_object.hitobject.x, current_object.hitobject.x))
             if last_direction == direction:
                 distance_to_next -= last
             else:
                 distance_to_next -= player_width_half
-            print("{}, distance_to_next: {}".format(i, distance_to_next))
 
             if time_to_next < distance_to_next:
                 current_object.hyperdash = True

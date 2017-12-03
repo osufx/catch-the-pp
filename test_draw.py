@@ -10,8 +10,8 @@ tur.penup()
 tur.speed(2)
 
 for hitobject in beatmap.hitobjects:
-    #if hitobject.time < 36300 or hitobject.time > 37600:
-        #continue
+    if hitobject.time < 8000:
+        continue
     tur.goto(hitobject.x, -hitobject.y)
     tur.pendown()
     tur.pencolor("red")
@@ -29,8 +29,17 @@ for hitobject in beatmap.hitobjects:
             time.sleep(0.5)
             i += 1
             tur.dot(6, "black")
+
+        i = 0
+        for end_tick in hitobject.end_ticks:
+            tur.goto(end_tick.x, -end_tick.y)
+            print("time: {}, x: {}, y: {}, type: end_tick, num: {}".format(end_tick.time, end_tick.x, end_tick.y, i))
+            time.sleep(0.5)
+            i += 1
+            tur.dot(6, "gray")
         
         tur.goto(hitobject.end.x, -hitobject.end.y)
+        print("time: {}, x: {}, y: {}, type: sliderEnd".format(hitobject.end.time, hitobject.end.x, hitobject.end.y))
         tur.pencolor("green")
         tur.dot(6)
     else:

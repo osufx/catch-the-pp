@@ -98,6 +98,8 @@ class Difficulty(object):
             if 2 & hitobject.type:
                 for tick in hitobject.ticks:
                     self.hitobjects_with_ticks.append(tick)
+                for end_tick in hitobject.end_ticks:
+                    self.hitobjects_with_ticks.append(end_tick)
                 self.hitobjects_with_ticks.append(hitobject.end)
 
         self.difficulty_objects = []
@@ -154,6 +156,7 @@ class Difficulty(object):
         """
         last_direction = 0
         player_width_half = self.player_width / 2
+        print("player_width_half: {}".format(player_width_half))
         last = player_width_half
 
         for i in range(len(self.difficulty_objects) - 1):
@@ -166,11 +169,14 @@ class Difficulty(object):
                 direction = -1
 
             time_to_next = next_object.hitobject.time - current_object.hitobject.time - 4.166667 #ms for 60fps divided by 4
+            print("{}, next_object.time: {}, current_object.time: {}, time_to_next: {}".format(i, next_object.hitobject.time, current_object.hitobject.time, time_to_next))
             distance_to_next = abs(next_object.hitobject.x - current_object.hitobject.x)
+            print("{}, next_object.x: {}, current_object.x: {}".format(i, next_object.hitobject.x, current_object.hitobject.x))
             if last_direction == direction:
                 distance_to_next -= last
             else:
                 distance_to_next -= player_width_half
+            print("{}, distance_to_next: {}".format(i, distance_to_next))
 
             if time_to_next < distance_to_next:
                 current_object.hyperdash = True

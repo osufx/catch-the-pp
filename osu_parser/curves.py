@@ -60,7 +60,7 @@ class Catmull(object):  #Yes... I cry deep down on the inside aswell
     def __init__(self, points):
         self.points = points
         self.order = len(points)
-        self.step = 0.25   #Normaly 0.025
+        self.step = 0.025   #Normaly 0.025
         self.pos = []
         self.calc_points()
 

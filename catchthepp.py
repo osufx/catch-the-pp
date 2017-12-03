@@ -482,6 +482,9 @@ class Beatmap(object):
         self.hitobjects = []
         self.max_combo = 0
         self.parse_beatmap()
+
+        if "ApproachRate" not in self.difficulty.keys():    #Fix old osu version
+            self.difficulty["ApproachRate"] = self.difficulty["OverallDifficulty"]
     
     def parse_beatmap(self):
         """

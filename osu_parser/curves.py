@@ -1,4 +1,5 @@
 import math
+import constants
 from osu_parser import mathhelper
 
 class Linear(object):   #Because it made sense at the time...
@@ -31,7 +32,7 @@ class Bezier(object):
 
     def bezier(self, points):
         order = len(points)
-        step = 0.0025 / order #Normaly 0.0025
+        step = 0.25 / constants.SLIDER_QUALITY / order    #Normaly 0.0025
         i = 0
         n = order - 1
         while i < 1 + step:
@@ -60,7 +61,7 @@ class Catmull(object):  #Yes... I cry deep down on the inside aswell
     def __init__(self, points):
         self.points = points
         self.order = len(points)
-        self.step = 0.025   #Normaly 0.025
+        self.step = 2.5 / constants.SLIDER_QUALITY    #Normaly 0.025
         self.pos = []
         self.calc_points()
 

@@ -1,4 +1,13 @@
+"""
+Catch-The-PP
+
+https://github.com/osufx/catch-the-pp
+by EmilySunpy, licensed under the GNU GPL 3 License.
+"""
 import math
+import copy
+
+MODULE_NAME = "ctpp"
 
 STAR_SCALING_FACTOR = 0.145
 STRAIN_STEP = 750
@@ -7,6 +16,8 @@ DECAY_BASE = 0.2
 ABSOLUTE_PLAYER_POSITIONING_ERROR = 16
 NORMALIZED_HITOBJECT_RADIUS = 41
 DIRECTION_CHANGE_BONUS = 12.5
+
+SLIDER_QUALITY = 50
 
 #HELPERS
 def clamp(value, mn, mx):
@@ -152,7 +163,7 @@ class Bezier(object):
 
     def bezier(self, points):
         order = len(points)
-        step = 0.25 / order #Normaly 0.0025
+        step = 0.25 / SLIDER_QUALITY / order #Normaly 0.0025
         i = 0
         n = order - 1
         while i < 1 + step:
@@ -181,7 +192,7 @@ class Catmull(object):  #Yes... I cry deep down on the inside aswell
     def __init__(self, points):
         self.points = points
         self.order = len(points)
-        self.step = 0.25   #Normaly 0.025
+        self.step = 2.5 / SLIDER_QUALITY   #Normaly 0.025
         self.pos = []
         self.calc_points()
 
@@ -325,9 +336,10 @@ class HitObject(object):
             self.timing_point = timing_point
             self.difficulty = difficulty
             self.tick_distance = tick_distance
-            self.duration = self.timing_point["raw_bpm"] * (pixel_length / (self.difficulty["SliderMultiplier"] * self.timing_point["spm"])) / 100
+            self.duration = self.timing_point["raw_bpm"] * (pixel_length / (self.difficulty["SliderMultiplier"] * self.timing_point["spm"])) / 100 * self.repeat
 
             self.ticks = []
+            self.end_ticks = []
 
             self.calc_slider()
     
@@ -367,15 +379,19 @@ class HitObject(object):
         #End time
         self.end_time = self.time + self.duration
 
+        end_length = self.pixel_length
+        if 1 & self.repeat == 0:
+            end_length = 0
+
         #End points
         if self.slider_type == "L":     #Linear
-            self.end = point_on_line(self.curve_points[0], self.curve_points[1], self.pixel_length)
+            self.end = point_on_line(self.curve_points[0], self.curve_points[1], end_length)
         elif self.slider_type == "P":   #Perfect
-            self.end = curve.point_at_distance(self.pixel_length)
+            self.end = curve.point_at_distance(end_length)
         elif self.slider_type == "B":   #Bezier
-            self.end = curve.point_at_distance(self.pixel_length)
+            self.end = curve.point_at_distance(end_length)
         elif self.slider_type == "C":   #Catmull
-            self.end = curve.point_at_distance(self.pixel_length)
+            self.end = curve.point_at_distance(end_length)
         else:
             raise Exception("Slidertype not supported! ({})".format(self.slider_type))
         
@@ -384,14 +400,49 @@ class HitObject(object):
 
         #Set slider ticks
         current_distance = self.tick_distance
-        time_add = self.duration * (self.tick_distance / self.pixel_length)
-        while current_distance < self.pixel_length - 1:
+        time_add = self.duration * (self.tick_distance / (self.pixel_length * self.repeat))
+
+        while current_distance < self.pixel_length:
             if self.slider_type == "L":     #Linear
                 point = point_on_line(self.curve_points[0], self.curve_points[1], current_distance)
             else:   #Perfect, Bezier & Catmull uses the same function
                 point = curve.point_at_distance(current_distance)
+
             self.ticks.append(SliderTick(point.x, point.y, self.time + time_add * (len(self.ticks) + 1)))
             current_distance += self.tick_distance
+        
+        #Adds slider_ends / repeat_points
+        repeat_id = 1
+        repeat_bonus_ticks = []
+        while repeat_id < self.repeat:
+            dist = (1 & repeat_id) * self.pixel_length
+            time_offset = (self.duration / self.repeat) * repeat_id
+
+            if self.slider_type == "L":     #Linear
+                point = point_on_line(self.curve_points[0], self.curve_points[1], dist)
+            else:   #Perfect, Bezier & Catmull uses the same function
+                point = curve.point_at_distance(dist)
+
+            self.end_ticks.append(SliderTick(point.x, point.y, self.time + time_offset))
+
+            #Adds the ticks that already exists on the slider back (but reversed)
+            repeat_ticks = copy.deepcopy(self.ticks)
+
+            if 1 & repeat_id: #We have to reverse the timing normalizer
+                #repeat_ticks = list(reversed(repeat_ticks))
+                normalize_time_value = self.time + (self.duration / self.repeat)
+            else:
+                normalize_time_value = self.time
+
+            #Correct timing
+            for tick in repeat_ticks:
+                tick.time = self.time + time_offset + abs(tick.time - normalize_time_value)
+
+            repeat_bonus_ticks += repeat_ticks
+
+            repeat_id += 1
+
+        self.ticks += repeat_bonus_ticks
 
     def get_combo(self):
         """
@@ -399,10 +450,9 @@ class HitObject(object):
         1 if normal hitobject, 2+ if slider (adds sliderticks)
         """
         if 2 & self.type:   #Slider
-            val = 2                     #There is always a start and an end hitobject on every slider
+            val = 1                     #Start of the slider
             val += len(self.ticks)      #The amount of sliderticks
-            val *= self.repeat          #Reverse slider
-            val -= (self.repeat - 1)    #Remove the reversearrow hitobject so it doesnt count reverse points twice
+            val += self.repeat          #Reverse slider
         else:   #Normal
             val = 1                     #Itself...
         
@@ -432,13 +482,12 @@ class Beatmap(object):
         self.hitobjects = []
         self.max_combo = 0
         self.parse_beatmap()
-        print("Beatmap parsed!")
     
     def parse_beatmap(self):
         """
         Parses beatmap file line by line by passing each line into parse_line.
         """
-        with open(self.file_name) as file_stream:
+        with open(self.file_name, encoding="utf8") as file_stream:
             self.version = int(''.join(list(filter(str.isdigit, file_stream.readline()))))  #Set version
             for line in file_stream:
                 self.parse_line(line.replace("\n", ""))
@@ -683,6 +732,8 @@ class Difficulty(object):
             if 2 & hitobject.type:
                 for tick in hitobject.ticks:
                     self.hitobjects_with_ticks.append(tick)
+                for end_tick in hitobject.end_ticks:
+                    self.hitobjects_with_ticks.append(end_tick)
                 self.hitobjects_with_ticks.append(hitobject.end)
 
         self.difficulty_objects = []

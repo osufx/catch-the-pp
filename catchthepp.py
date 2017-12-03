@@ -337,6 +337,7 @@ class HitObject(object):
             self.difficulty = difficulty
             self.tick_distance = tick_distance
             self.duration = self.timing_point["raw_bpm"] * (pixel_length / (self.difficulty["SliderMultiplier"] * self.timing_point["spm"])) / 100 * self.repeat
+            print("DEBUG[{}]: {}".format(self.time, self.timing_point["spm"]))
 
             self.ticks = []
             self.end_ticks = []
@@ -482,6 +483,8 @@ class Beatmap(object):
         self.hitobjects = []
         self.max_combo = 0
         self.parse_beatmap()
+        print("Beatmap parsed!")
+        print("filename: {}, max_combo: {}".format(self.file_name, self.max_combo))
     
     def parse_beatmap(self):
         """
@@ -566,6 +569,7 @@ class Beatmap(object):
             pixel_length = float(split_object[7])
 
             time_point = self.get_timing_point_all(time)
+            print("time: {}, {}".format(time, time_point["spm"]))
 
             tick_distance = (100 * self.difficulty["SliderMultiplier"]) / self.difficulty["SliderTickRate"]
             if self.version >= 8:
@@ -592,10 +596,10 @@ class Beatmap(object):
         return -- {"raw_bpm": Float, "raw_spm": Float, "bpm": Float, "spm": Float}
         """
         types = {
-            "raw_bpm": 60000,
-            "raw_spm": -100,
-            "bpm": 100,
-            "spm": 1
+            "raw_bpm": 60000.0,
+            "raw_spm": -100.0,
+            "bpm": 100.0,
+            "spm": 1.0
         }   #Will return the default value if timing point were not found
         for t in types.keys():
             r = self.get_timing_point(time, t)
@@ -614,7 +618,7 @@ class Beatmap(object):
         """
         r = None
         try:
-            for key in self.timing_points[timing_type].keys():
+            for key in sorted(self.timing_points[timing_type].keys(), key=lambda k: k):
                 if key <= time:
                     r = self.timing_points[timing_type][key]
                 else:
@@ -753,6 +757,7 @@ class Difficulty(object):
         self.calculate_strain_values()
 
         self.star_rating = pow(self.calculate_difficulty(), 0.5) * STAR_SCALING_FACTOR
+        print("stars: {}, mods: {}".format(self.star_rating, self.mods))
 
     def adjust_difficulty(self, diff, mods):
         """
@@ -915,4 +920,5 @@ def calculate_pp(diff, accuracy, combo, miss):
     if diff.mods & 1 << 12 > 0:    #SO
         pp *= 0.95
 
+    print("pp: {}, accuracy: {}, combo: {}, miss: {}".format(pp, accuracy, combo, miss))
     return pp

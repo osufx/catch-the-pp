@@ -13,7 +13,9 @@ class Beatmap(object):
         self.file_name = file_name
         self.version = -1   #Unknown by default
         self.header = -1
-        self.difficulty = {}
+        self.difficulty = {
+            "d": 2
+        }
         self.timing_points = {
             "raw_bpm": {},  #Raw bpm modifier code
             "raw_spm": {}, #Raw speed modifier code
@@ -159,7 +161,7 @@ class Beatmap(object):
         """
         r = None
         try:
-            for key in self.timing_points[timing_type].keys():
+            for key in sorted(self.timing_points[timing_type].keys(), key=lambda k: k):
                 if key <= time:
                     r = self.timing_points[timing_type][key]
                 else:

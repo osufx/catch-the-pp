@@ -1,10 +1,19 @@
 from osu_parser import mathhelper
 from osu_parser.hitobject import HitObject
 
-class Beatmap(object):
+cdef class Beatmap(object):
     """
     Beatmap object for beatmap parsing and handling
     """
+
+    cdef public str file_name
+    cdef public int version
+    cdef public int header
+    cdef public dict difficulty
+    cdef public dict timing_points
+    cdef public int slider_point_distance
+    cdef public list hitobjects
+    cdef public int max_combo
 
     def __init__(self, file_name):
         """
@@ -27,19 +36,18 @@ class Beatmap(object):
 
         if "ApproachRate" not in self.difficulty.keys():    #Fix old osu version
             self.difficulty["ApproachRate"] = self.difficulty["OverallDifficulty"]
-
-        print("Beatmap parsed!")
     
-    def parse_beatmap(self):
+    cpdef parse_beatmap(self):
         """
         Parses beatmap file line by line by passing each line into parse_line.
         """
+        cdef str line
         with open(self.file_name, encoding="utf8") as file_stream:
             self.version = int(''.join(list(filter(str.isdigit, file_stream.readline()))))  #Set version
             for line in file_stream:
                 self.parse_line(line.replace("\n", ""))
 
-    def parse_line(self, line):
+    cpdef parse_line(self, str line):
         """
         Parse a beatmapfile line.
 
@@ -71,14 +79,14 @@ class Beatmap(object):
         elif self.header == 2:
             self.handle_hitobject(line)
     
-    def handle_difficulty_propperty(self, propperty):
+    cpdef handle_difficulty_propperty(self, str propperty):
         """
         Puts the [Difficulty] propperty into the difficulty dict.
         """
         prop = propperty.split(":")
         self.difficulty[prop[0]] = float(prop[1])
 
-    def handle_timing_point(self, timing_point):
+    cpdef handle_timing_point(self, str timing_point):
         """
         Formats timing points used for slider velocity changes,
         and store them into self.timing_points dict.
@@ -94,7 +102,7 @@ class Beatmap(object):
             self.timing_points["bpm"][timing_point_time] = 60000 / float(timing_point_focus)#^
             self.timing_points["raw_bpm"][timing_point_time] = float(timing_point_focus)
 
-    def handle_hitobject(self, line):
+    cpdef handle_hitobject(self, str line):
         """
         Puts every hitobject into the hitobjects array.
 
@@ -146,7 +154,7 @@ class Beatmap(object):
         }   #Will return the default value if timing point were not found
         for t in types.keys():
             r = self.get_timing_point(time, t)
-            if r != None:
+            if r is not None:
                 types[t] = r
             #else:
                 #print("{} were not found for timestamp {}, using {} instead.".format(t, time, types[t]))
@@ -178,7 +186,7 @@ class Beatmap(object):
 
         return -- total hitobjects for parsed beatmap
         """
-        count = 0
+        cdef int count = 0
         for hitobject in self.hitobjects:
             count += hitobject.get_points()
         return count

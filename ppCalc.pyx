@@ -1,6 +1,6 @@
 import math
 
-def calculate_pp(diff, accuracy, combo, miss):
+cpdef calculate_pp(diff, accuracy, combo, miss):
     """
     Calculate pp for gameplay
 
@@ -10,14 +10,14 @@ def calculate_pp(diff, accuracy, combo, miss):
     miss        -- Amount of misses during the play (Int)
     return      -- Total pp for gameplay
     """
-    pp = pow(((5 * diff.star_rating / 0.0049) - 4), 2) / 100000
-    length_bonus = 0.95 + 0.4 * min(1, combo / 3000)
+    cdef float pp = (((5 * diff.star_rating / 0.0049) - 4) ** 2) / 100000
+    cdef float length_bonus = 0.95 + 0.4 * min(1, combo / 3000)
     if combo > 3000:
         length_bonus += math.log10(combo / 3000) * 0.5
 
     pp *= length_bonus
-    pp *= pow(0.97, miss)
-    pp *= min(pow(combo, 0.8) / pow(diff.beatmap.max_combo, 0.8), 1)
+    pp *= (0.97 ** miss)
+    pp *= min((combo ** 0.8) / (diff.beatmap.max_combo ** 0.8), 1)
 
     if diff.beatmap.difficulty["ApproachRate"] > 9:
         pp *= 1 + 0.1 * (diff.beatmap.difficulty["ApproachRate"] - 9)
@@ -30,7 +30,7 @@ def calculate_pp(diff, accuracy, combo, miss):
     if diff.mods & 1 << 10 > 0:    #FL
         pp *= 1.35 * length_bonus
 
-    pp *= pow(accuracy, 5.5)
+    pp *= (accuracy ** 5.5)
 
     if diff.mods & 1 << 0 > 0:    #NF
         pp *= 0.9

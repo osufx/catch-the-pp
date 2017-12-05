@@ -5,7 +5,7 @@ from osu.ctb.difficulty import Difficulty
 from ppCalc import calculate_pp
 
 if len(sys.argv) <= 1:
-    beatmap = Beatmap("test.osu") #Yes... this be my test file (Will remove when project is done)
+    beatmap = Beatmap("test.osu")  # Yes... this be my test file (Will remove when project is done)
 else:
     beatmap = Beatmap(sys.argv[1])
 
@@ -16,7 +16,9 @@ else:
 
 difficulty = Difficulty(beatmap, mods)
 print("Calculation:")
-print("Stars: {}, PP: {}, MaxCombo: {}\n".format(difficulty.star_rating, calculate_pp(difficulty, 1, beatmap.max_combo, 0), beatmap.max_combo))
+print("Stars: {}, PP: {}, MaxCombo: {}\n".format(
+    difficulty.star_rating, calculate_pp(difficulty, 1, beatmap.max_combo, 0), beatmap.max_combo
+))
 
 """
 m = {"NOMOD": 0, "EASY": 2, "HIDDEN": 8, "HARDROCK": 16, "DOUBLETIME": 64, "HALFTIME": 256, "FLASHLIGHT": 1024}

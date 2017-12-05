@@ -1,14 +1,22 @@
-import math
 import copy
 from osu_parser import mathhelper, curves
 
-class SliderTick(object):
+cdef class SliderTick:
+    cdef public float x, y, time
+
     def __init__(self, x, y, time):
         self.x = x
         self.y = y
         self.time = time
 
-class HitObject(object):
+cdef class HitObject(object):
+    cdef public float x, y, time, end_time, pixel_length, tick_distance, duration
+    cdef public int type, repeat
+    cdef public str slider_type
+    cdef public list curve_points, ticks, end_ticks, path
+    cdef public dict timing_point
+    cdef public object difficulty, end
+
     def __init__(self, x, y, time, object_type, slider_type = None, curve_points = None, repeat = 1, pixel_length = 0, timing_point = None, difficulty = None, tick_distance = 1):
         """
         HitObject params for normal hitobject and sliders
@@ -30,6 +38,7 @@ class HitObject(object):
         self.x = x
         self.y = y
         self.time = time
+        self.end_time = 0
         self.type = object_type
 
         #isSlider?
@@ -47,9 +56,11 @@ class HitObject(object):
 
             self.ticks = []
             self.end_ticks = []
+            self.path = []
+            self.end = None
 
             self.calc_slider()
-    
+
     def calc_slider(self, calc_path = False):
         #Fix broken objects
         if self.slider_type == "P" and len(self.curve_points) > 3:
@@ -101,7 +112,7 @@ class HitObject(object):
             self.end = curve.point_at_distance(end_length)
         else:
             raise Exception("Slidertype not supported! ({})".format(self.slider_type))
-        
+
         #Put end time on end point
         self.end = SliderTick(self.end.x, self.end.y, self.end_time)
 
@@ -117,7 +128,7 @@ class HitObject(object):
 
             self.ticks.append(SliderTick(point.x, point.y, self.time + time_add * (len(self.ticks) + 1)))
             current_distance += self.tick_distance
-        
+
         #Adds slider_ends / repeat_points
         repeat_id = 1
         repeat_bonus_ticks = []
@@ -162,5 +173,5 @@ class HitObject(object):
             val += self.repeat          #Reverse slider
         else:   #Normal
             val = 1                     #Itself...
-        
+
         return val

@@ -1,9 +1,9 @@
 import math
 
-def clamp(value, mn, mx):
+cpdef float clamp(float value, float mn, float mx):
     return min(max(mn, value), mx)
 
-def sign(value):
+cpdef sign(float value):
     if value == 0:
         return 0
     elif value > 0:
@@ -11,7 +11,7 @@ def sign(value):
     else:
         return -1
 
-def cpn(p, n):
+cpdef cpn(int p, int n):
     if p < 0 or p > n:
         return 0
     p = min(p, n - p)
@@ -21,42 +21,43 @@ def cpn(p, n):
 
     return out
 
-def catmull(p, t): # WARNING:   Worst math formula incomming
+cpdef float catmull(p, t): # WARNING:   Worst math formula incomming
     return 0.5 * (
         (2 * p[1]) +
         (-p[0] + p[2]) * t +
-        (2 * p[0] - 5 * p[1] + 4 * p[2] - p[3]) * pow(t, 2) +
-        (-p[0] + 3 * p[1] - 3 * p[2] + p[3]) * pow(t, 3))
+        (2 * p[0] - 5 * p[1] + 4 * p[2] - p[3]) * (t ** 2) +
+        (-p[0] + 3 * p[1] - 3 * p[2] + p[3]) * (t ** 3))
 
-def point_on_line(p0, p1, length):
-    full_length = pow(pow(p1.x - p0.x, 2) + pow(p1.y - p0.y, 2), 0.5)
-    n = full_length - length
+cpdef Vec2 point_on_line(Vec2 p0, Vec2 p1, float length):
+    cdef float full_length = (((p1.x - p0.x) ** 2) + ((p1.y - p0.y) ** 2)) ** 0.5
+    cdef float n = full_length - length
 
-    x = (n * p0.x + length * p1.x) / full_length
-    y = (n * p0.y + length * p1.y) / full_length
+    cdef float x = (n * p0.x + length * p1.x) / full_length
+    cdef float y = (n * p0.y + length * p1.y) / full_length
     return Vec2(x, y)
 
-def angle_from_points(p0, p1):
+cpdef float angle_from_points(Vec2 p0, Vec2 p1):
     return math.atan2(p1.y - p0.y, p1.x - p0.x)
 
-def distance_from_points(array):
-    distance = 0
+cpdef float distance_from_points(array):
+    cdef float distance = 0
+    cdef int i
 
     for i in range(1, len(array)):
         distance += array[i].distance(array[i - 1])
 
     return distance
 
-def cart_from_pol(r, t):
-    x = (r * math.cos(t))
-    y = (r * math.sin(t))
+cpdef Vec2 cart_from_pol(r, t):
+    cdef float x = (r * math.cos(t))
+    cdef float y = (r * math.sin(t))
 
     return Vec2(x, y)
 
-def point_at_distance(array, distance, return_extra = False): #TODO: Optimize...
-    i = 0
-    current_distance = 0
-    new_distance = 0
+cpdef point_at_distance(array, float distance, int return_extra = False): #TODO: Optimize...
+    cdef int i = 0
+    cdef float x, y, current_distance = 0, new_distance = 0, angle
+    cdef Vec2 coord, cart
 
     if len(array) < 2:
         if return_extra:
@@ -107,26 +108,35 @@ def point_at_distance(array, distance, return_extra = False): #TODO: Optimize...
             coord = Vec2((array[i].x - cart.x), (array[i].y - cart.y))
         else:
             coord = Vec2((array[i].x + cart.y), (array[i].y + cart.y))
-    
+
     if return_extra:
         return [coord, angle, i]
     else:
         return coord
 
-class Vec2(object):
+cdef class Vec2(object):
+    cdef public float x
+    cdef public float y
+
     def __init__(self, x, y):
         self.x = x
         self.y = y
 
-    def __eq__(self, other):
+    def __richcmp__(x, y, op):
+        if op == 2:#Py_EQ
+            return x.__is_equal(y)
+        else:#Py_NE
+            return not x.__is_equal(y)
+
+    def __is_equal(self, other):
         return self.x == other.x and self.y == other.y
 
-    def distance(self, other):
-        x = self.x - other.x
-        y = self.y - other.y
-        return pow(x*x + y*y, 0.5)  #sqrt, lol
+    cpdef float distance(Vec2 self, Vec2 other):
+        cdef float x = self.x - other.x
+        cdef float y = self.y - other.y
+        return (x*x + y*y) ** 0.5  #sqrt, lol
 
-    def calc(self, value, other):   #I dont know what to call this function yet
-        x = self.x + value * other.x
-        y = self.y + value * other.y
+    cpdef float calc(self, Vec2 value, Vec2 other):   #I dont know what to call this function yet
+        cdef float x = self.x + value * other.x
+        cdef float y = self.y + value * other.y
         return Vec2(x, y)

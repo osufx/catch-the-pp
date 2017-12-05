@@ -1,13 +1,19 @@
 import constants
 from osu_parser.mathhelper import clamp, sign
 
-class DifficultyObject(object):
+
+cdef class DifficultyObject:
     """
     Object that holds strain value etc.
 
     Handled in Difficulty.calculate_strainValues & Difficulty.update_hyperdash_distance.
     Used in Difficulty.calculate_difficulty
     """
+    cdef public float strain, last_movement
+    cdef public float offset, player_width, scaled_position, hyperdash_distance
+    cdef public object hitobject
+    cdef public int error_margin, hyperdash
+
     def __init__(self, hitobject, player_width):
         """
         Hitobject wrapper to do calculation with.
@@ -25,7 +31,7 @@ class DifficultyObject(object):
         self.hyperdash_distance = 0
         self.hyperdash = False
 
-    def calculate_strain(self, last, time_rate):
+    cpdef calculate_strain(self, object last, float time_rate):
         """
         Calculate strain value by refering last object.
         (and sets offset & last_movement info)
@@ -33,8 +39,8 @@ class DifficultyObject(object):
         last        -- Previous hitobject
         time_rate    -- Timescale from enabled mods
         """
-        time = (self.hitobject.time - last.hitobject.time) / time_rate
-        decay = pow(constants.DECAY_BASE, time / 1000)
+        cdef float time = (self.hitobject.time - last.hitobject.time) / time_rate
+        cdef float decay = constants.DECAY_BASE ** (time / 1000)
 
         self.offset = clamp(last.scaled_position + last.offset,
             self.scaled_position - (constants.NORMALIZED_HITOBJECT_RADIUS - self.error_margin),
@@ -43,13 +49,13 @@ class DifficultyObject(object):
 
         self.last_movement = abs(self.scaled_position - last.scaled_position + self.offset - last.offset)
 
-        addition = pow(self.last_movement, 1.3) / 500
+        cdef float addition = (self.last_movement ** 1.3) / 500
 
         if self.scaled_position < last.scaled_position:
             self.last_movement *= -1
 
-        addition_bonus = 0
-        sqrt_time = pow(max(time, 25), 0.5)
+        cdef float addition_bonus = 0
+        cdef float sqrt_time = max(time, 25) ** 0.5
 
         if abs(self.last_movement) > 0.1:
             if abs(last.last_movement) > 0.1 and sign(self.last_movement) != sign(last.last_movement):
@@ -74,12 +80,17 @@ class DifficultyObject(object):
         addition *= 850 / max(time, 25)
         self.strain = last.strain * decay + addition
 
-class Difficulty(object):
+cdef class Difficulty:
     """
     Difficulty object for calculating star rating.
 
     Stars: self.star_rating
     """
+    cdef public object beatmap
+    cdef public int mods
+    cdef public list hitobjects_with_ticks, difficulty_objects
+    cdef public float time_rate, player_width, star_rating
+
 
     def __init__(self, beatmap, mods):
         """
@@ -92,6 +103,7 @@ class Difficulty(object):
         self.beatmap = beatmap
         self.mods = mods
 
+        cdef object hitobject
         self.hitobjects_with_ticks = []
         for hitobject in self.beatmap.hitobjects:
             self.hitobjects_with_ticks.append(hitobject)
@@ -118,7 +130,7 @@ class Difficulty(object):
 
         self.calculate_strain_values()
 
-        self.star_rating = pow(self.calculate_difficulty(), 0.5) * constants.STAR_SCALING_FACTOR
+        self.star_rating = (self.calculate_difficulty() ** 0.5) * constants.STAR_SCALING_FACTOR
 
     def adjust_difficulty(self, diff, mods):
         """
@@ -150,14 +162,15 @@ class Difficulty(object):
 
         return rate
 
-    def update_hyperdash_distance(self):
+    cpdef update_hyperdash_distance(self):
         """
         Update hyperdash_distance value for every hitobject in the beatmap.
         """
-        last_direction = 0
-        player_width_half = self.player_width / 2
-        print("player_width_half: {}".format(player_width_half))
-        last = player_width_half
+        cdef int last_direction = 0, direction, i
+        cdef float player_width_half = self.player_width / 2
+        cdef float last = player_width_half
+
+        cdef object current_object, next_object
 
         for i in range(len(self.difficulty_objects) - 1):
             current_object = self.difficulty_objects[i]
@@ -184,23 +197,23 @@ class Difficulty(object):
 
             last_direction = direction
 
-    def calculate_strain_values(self):
+    cpdef calculate_strain_values(self):
         """
         Calculate strain values for every hitobject.
 
         It does this by using distance, decay & previous hitobject strain value.
         Time_rate also effects this.
         """
-        current_object = self.difficulty_objects[0]
+        cdef object current_object = self.difficulty_objects[0], next_object
 
-        index = 1
+        cdef index = 1
         while index < len(self.difficulty_objects):
             next_object = self.difficulty_objects[index]
             next_object.calculate_strain(current_object, self.time_rate)
             current_object = next_object
             index += 1
 
-    def calculate_difficulty(self):
+    cpdef float calculate_difficulty(self):
         """
         Calculates the difficulty for this beatmap.
         This is used in the final function to calculate star rating.
@@ -208,21 +221,21 @@ class Difficulty(object):
 
         return -- difficulty
         """
-        strain_step = constants.STRAIN_STEP * self.time_rate
-        highest_strains = []
-        interval = strain_step
-        max_strain = 0
+        cdef float strain_step = constants.STRAIN_STEP * self.time_rate
+        cdef list highest_strains = []
+        cdef float interval = strain_step
+        cdef float max_strain = 0
 
-        last = None
+        cdef object last = None, difficulty_object
 
         for difficulty_object in self.difficulty_objects:
             while difficulty_object.hitobject.time > interval:
                 highest_strains.append(max_strain)
 
-                if last == None:
+                if last is None:
                     max_strain = 0
                 else:
-                    decay = pow(constants.DECAY_BASE, (interval - last.hitobject.time) / 1000)
+                    decay = (constants.DECAY_BASE ** ((interval - last.hitobject.time) / 1000))
                     max_strain = last.strain * decay
 
                 interval += strain_step
@@ -232,12 +245,13 @@ class Difficulty(object):
 
             last = difficulty_object
 
-        difficulty = 0
-        weight = 1
+        cdef float difficulty = 0
+        cdef float weight = 1
 
         #Sort from high to low strain
         highest_strains.sort(key=int, reverse=True)
 
+        cdef float strain
         for strain in highest_strains:
             difficulty += weight * strain
             weight *= constants.DECAY_WEIGHT

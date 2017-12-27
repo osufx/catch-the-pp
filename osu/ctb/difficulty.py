@@ -100,7 +100,6 @@ class Difficulty(object):
                     self.hitobjects_with_ticks.append(tick)
                 for end_tick in hitobject.end_ticks:
                     self.hitobjects_with_ticks.append(end_tick)
-                self.hitobjects_with_ticks.append(hitobject.end)
 
         self.difficulty_objects = []
 

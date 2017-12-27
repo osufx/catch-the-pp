@@ -29,7 +29,7 @@ class Beatmap(object):
             self.difficulty["ApproachRate"] = self.difficulty["OverallDifficulty"]
 
         print("Beatmap parsed!")
-    
+
     def parse_beatmap(self):
         """
         Parses beatmap file line by line by passing each line into parse_line.
@@ -70,7 +70,7 @@ class Beatmap(object):
             self.handle_timing_point(line)
         elif self.header == 2:
             self.handle_hitobject(line)
-    
+
     def handle_difficulty_propperty(self, propperty):
         """
         Puts the [Difficulty] propperty into the difficulty dict.
@@ -93,6 +93,10 @@ class Beatmap(object):
         else:
             self.timing_points["bpm"][timing_point_time] = 60000 / float(timing_point_focus)#^
             self.timing_points["raw_bpm"][timing_point_time] = float(timing_point_focus)
+            #This trash of a game resets the spm when bpm change >.>
+            self.timing_points["spm"][timing_point_time] = 1
+            self.timing_points["raw_spm"][timing_point_time] = -100
+
 
     def handle_hitobject(self, line):
         """
@@ -116,7 +120,10 @@ class Beatmap(object):
 
             tick_distance = (100 * self.difficulty["SliderMultiplier"]) / self.difficulty["SliderTickRate"]
             if self.version >= 8:
-                tick_distance /= mathhelper.clamp(-time_point["raw_spm"], 10, 1000) / 100
+                #tick_distance /= time_point["spm"]
+                tick_distance /= (mathhelper.clamp(-time_point["raw_spm"], 10, 1000) / 100)
+
+            #tick_distance /= time_point["spm"]
 
             curve_split = split_object[5].split("|")
             curve_points = []

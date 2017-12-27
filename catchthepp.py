@@ -395,7 +395,7 @@ class HitObject(object):
             else:   #Perfect, Bezier & Catmull uses the same function
                 point = curve.point_at_distance(self.pixel_length)
 
-        self.end_ticks.append(SliderTick(point.x, point.y, self.time + self.duration))
+            self.end_ticks.append(SliderTick(point.x, point.y, self.time + self.duration))
 
         #Adds slider_ends / repeat_points
         repeat_id = 1

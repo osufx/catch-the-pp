@@ -391,7 +391,7 @@ class HitObject(object):
 
         if self.repeat == 1:
             if self.slider_type == "L":     #Linear
-                point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], self.pixel_length)
+                point = point_on_line(self.curve_points[0], self.curve_points[1], self.pixel_length)
             else:   #Perfect, Bezier & Catmull uses the same function
                 point = curve.point_at_distance(self.pixel_length)
 
@@ -561,7 +561,7 @@ class Beatmap(object):
 
             tick_distance = (100 * self.difficulty["SliderMultiplier"]) / self.difficulty["SliderTickRate"]
             if self.version >= 8:
-                tick_distance /= (mathhelper.clamp(-time_point["raw_spm"], 10, 1000) / 100)
+                tick_distance /= (clamp(-time_point["raw_spm"], 10, 1000) / 100)
 
             curve_split = split_object[5].split("|")
             curve_points = []

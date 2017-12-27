@@ -376,33 +376,11 @@ class HitObject(object):
             else:
                 raise Exception("Slidertype not supported! ({})".format(self.slider_type))
 
-        #End time
-        self.end_time = self.time + self.duration
-
-        end_length = self.pixel_length
-        if 1 & self.repeat == 0:
-            end_length = 0
-
-        #End points
-        if self.slider_type == "L":     #Linear
-            self.end = point_on_line(self.curve_points[0], self.curve_points[1], end_length)
-        elif self.slider_type == "P":   #Perfect
-            self.end = curve.point_at_distance(end_length)
-        elif self.slider_type == "B":   #Bezier
-            self.end = curve.point_at_distance(end_length)
-        elif self.slider_type == "C":   #Catmull
-            self.end = curve.point_at_distance(end_length)
-        else:
-            raise Exception("Slidertype not supported! ({})".format(self.slider_type))
-        
-        #Put end time on end point
-        self.end = SliderTick(self.end.x, self.end.y, self.end_time)
-
         #Set slider ticks
         current_distance = self.tick_distance
         time_add = self.duration * (self.tick_distance / (self.pixel_length * self.repeat))
 
-        while current_distance < self.pixel_length:
+        while current_distance < self.pixel_length - self.tick_distance / 8:
             if self.slider_type == "L":     #Linear
                 point = point_on_line(self.curve_points[0], self.curve_points[1], current_distance)
             else:   #Perfect, Bezier & Catmull uses the same function
@@ -410,7 +388,15 @@ class HitObject(object):
 
             self.ticks.append(SliderTick(point.x, point.y, self.time + time_add * (len(self.ticks) + 1)))
             current_distance += self.tick_distance
-        
+
+        if self.repeat == 1:
+            if self.slider_type == "L":     #Linear
+                point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], self.pixel_length)
+            else:   #Perfect, Bezier & Catmull uses the same function
+                point = curve.point_at_distance(self.pixel_length)
+
+        self.end_ticks.append(SliderTick(point.x, point.y, self.time + self.duration))
+
         #Adds slider_ends / repeat_points
         repeat_id = 1
         repeat_bonus_ticks = []
@@ -455,7 +441,7 @@ class HitObject(object):
             val += self.repeat          #Reverse slider
         else:   #Normal
             val = 1                     #Itself...
-        
+
         return val
 
 #BEATMAP
@@ -549,6 +535,9 @@ class Beatmap(object):
         else:
             self.timing_points["bpm"][timing_point_time] = 60000 / float(timing_point_focus)#^
             self.timing_points["raw_bpm"][timing_point_time] = float(timing_point_focus)
+            #Trash
+            self.timing_points["spm"][timing_point_time] = 1
+            self.timing_points["raw_spm"][timing_point_time] = -100
 
     def handle_hitobject(self, line):
         """
@@ -572,7 +561,7 @@ class Beatmap(object):
 
             tick_distance = (100 * self.difficulty["SliderMultiplier"]) / self.difficulty["SliderTickRate"]
             if self.version >= 8:
-                tick_distance /= clamp(-time_point["raw_spm"], 10, 1000) / 100
+                tick_distance /= (mathhelper.clamp(-time_point["raw_spm"], 10, 1000) / 100)
 
             curve_split = split_object[5].split("|")
             curve_points = []
@@ -737,7 +726,6 @@ class Difficulty(object):
                     self.hitobjects_with_ticks.append(tick)
                 for end_tick in hitobject.end_ticks:
                     self.hitobjects_with_ticks.append(end_tick)
-                self.hitobjects_with_ticks.append(hitobject.end)
 
         self.difficulty_objects = []
 

@@ -101,6 +101,9 @@ cdef class Beatmap(object):
         else:
             self.timing_points["bpm"][timing_point_time] = 60000 / float(timing_point_focus)#^
             self.timing_points["raw_bpm"][timing_point_time] = float(timing_point_focus)
+            #This trash of a game resets the spm when bpm change >.>
+            self.timing_points["spm"][timing_point_time] = 1
+            self.timing_points["raw_spm"][timing_point_time] = -100
 
     cpdef handle_hitobject(self, str line):
         """
@@ -124,7 +127,10 @@ cdef class Beatmap(object):
 
             tick_distance = (100 * self.difficulty["SliderMultiplier"]) / self.difficulty["SliderTickRate"]
             if self.version >= 8:
-                tick_distance /= mathhelper.clamp(-time_point["raw_spm"], 10, 1000) / 100
+                #tick_distance /= time_point["spm"]
+                tick_distance /= (mathhelper.clamp(-time_point["raw_spm"], 10, 1000) / 100)
+
+            #tick_distance /= time_point["spm"]
 
             curve_split = split_object[5].split("|")
             curve_points = []

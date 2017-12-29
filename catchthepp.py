@@ -52,6 +52,10 @@ def point_on_line(p0, p1, length):
     full_length = pow(pow(p1.x - p0.x, 2) + pow(p1.y - p0.y, 2), 0.5)
     n = full_length - length
 
+    if full_length == 0:
+        print("full_length was forced to 1!")
+        full_length = 1
+
     x = (n * p0.x + length * p1.x) / full_length
     y = (n * p0.y + length * p1.y) / full_length
     return Vec2(x, y)
@@ -526,7 +530,7 @@ class Beatmap(object):
         and store them into self.timing_points dict.
         """
         timing_point_split = timing_point.split(",")
-        timing_point_time = int(timing_point_split[0])
+        timing_point_time = int(float(timing_point_split[0])) #Fixes some special mappers special needs
         timing_point_focus = timing_point_split[1]
 
         if timing_point_focus.startswith("-"):  #If not then its not a slider velocity modifier

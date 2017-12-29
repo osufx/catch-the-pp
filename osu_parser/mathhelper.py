@@ -32,6 +32,10 @@ def point_on_line(p0, p1, length):
     full_length = pow(pow(p1.x - p0.x, 2) + pow(p1.y - p0.y, 2), 0.5)
     n = full_length - length
 
+    if full_length == 0: #Fix for something that seems unknown... (We warn if this happens)
+        print("full_length was forced to 1!")
+        full_length = 1
+
     x = (n * p0.x + length * p1.x) / full_length
     y = (n * p0.y + length * p1.y) / full_length
     return Vec2(x, y)

@@ -84,7 +84,7 @@ class Beatmap(object):
         and store them into self.timing_points dict.
         """
         timing_point_split = timing_point.split(",")
-        timing_point_time = int(timing_point_split[0])
+        timing_point_time = int(float(timing_point_split[0])) #Fixes some special mappers special needs
         timing_point_focus = timing_point_split[1]
 
         if timing_point_focus.startswith("-"):  #If not then its not a slider velocity modifier

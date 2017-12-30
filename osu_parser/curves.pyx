@@ -2,20 +2,18 @@ import math
 import constants
 from osu_parser import mathhelper
 
-# class Linear(object):   #Because it made sense at the time...
-#     def __init__(self, points):
-#         self.pos = points
+class Linear(object):   #Because it made sense at the time...
+    def __init__(self, points):
+        self.pos = points
 
 cdef class Bezier(object):
     cdef public list points, pos
     cdef public int order
-    cdef public int anchor
 
-    def __init__(self, points, use_anchorpoints = False):
+    def __init__(self, points):
         self.points = points
         self.order = len(self.points)
         self.pos = []
-        self.anchor = use_anchorpoints
         self.calc_points()
 
     cpdef calc_points(self):
@@ -146,9 +144,8 @@ cpdef object get_point(object p, float length):
 cpdef tuple get_circum_circle(list p):
     cdef float d = 2 * (p[0].x * (p[1].y - p[2].y) + p[1].x * (p[2].y - p[0].y) + p[2].x * (p[0].y - p[1].y))
 
-    if d == 0:  #TODO: Look into this
-        print("FALSE PARSE: {}".format(p))
-        d = 1
+    if d == 0:
+        raise Exception("Invalid circle! Unable to chose angle.")
 
     cdef float ux = ((pow(p[0].x, 2) + pow(p[0].y, 2)) * (p[1].y - p[2].y) + (pow(p[1].x, 2) + pow(p[1].y, 2)) * (p[2].y - p[0].y) + (pow(p[2].x, 2) + pow(p[2].y, 2)) * (p[0].y - p[1].y)) / d
     cdef float uy = ((pow(p[0].x, 2) + pow(p[0].y, 2)) * (p[2].x - p[1].x) + (pow(p[1].x, 2) + pow(p[1].y, 2)) * (p[0].x - p[2].x) + (pow(p[2].x, 2) + pow(p[2].y, 2)) * (p[1].x - p[0].x)) / d

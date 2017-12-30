@@ -92,7 +92,7 @@ cdef class Beatmap(object):
         and store them into self.timing_points dict.
         """
         timing_point_split = timing_point.split(",")
-        timing_point_time = int(timing_point_split[0])
+        timing_point_time = int(float(timing_point_split[0])) #Fixes some special mappers special needs
         timing_point_focus = timing_point_split[1]
 
         if timing_point_focus.startswith("-"):  #If not then its not a slider velocity modifier
@@ -138,7 +138,18 @@ cdef class Beatmap(object):
                 vector_split = curve_split[i].split(":")
                 vector = mathhelper.Vec2(int(vector_split[0]), int(vector_split[1]))
                 curve_points.append(vector)
-            hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type, curve_split[0], curve_points, repeat, pixel_length, time_point, self.difficulty, tick_distance)
+
+            slider_type = curve_split[0]
+            if self.version <= 6 and len(curve_points) >= 2:
+                if slider_type == "L":
+                    slider_type = "B"
+
+                if len(curve_points) == 2:
+                    if (int(split_object[0]) == curve_points[0].x and int(split_object[1]) == curve_points[0].y) or (curve_points[0].x == curve_points[1].x and curve_points[0].y == curve_points[1].y):
+                        del curve_points[0]
+                        slider_type = "L"
+
+            hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type, slider_type, curve_points, repeat, pixel_length, time_point, self.difficulty, tick_distance)
         else:
             hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type)
 

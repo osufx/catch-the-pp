@@ -70,9 +70,12 @@ cdef class HitObject(object):
 
         #Make curve
         if self.slider_type == "P":     #Perfect
-            curve = curves.Perfect(self.curve_points)
+            try:
+                curve = curves.Perfect(self.curve_points)
+            except:
+                curve = curves.Bezier(self.curve_points)
         elif self.slider_type == "B":   #Bezier
-            curve = curves.Bezier(self.curve_points, True)
+            curve = curves.Bezier(self.curve_points)
         elif self.slider_type == "C":   #Catmull
             curve = curves.Catmull(self.curve_points)
 

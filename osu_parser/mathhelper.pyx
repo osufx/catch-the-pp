@@ -32,8 +32,12 @@ cpdef Vec2 point_on_line(Vec2 p0, Vec2 p1, float length):
     cdef float full_length = (((p1.x - p0.x) ** 2) + ((p1.y - p0.y) ** 2)) ** 0.5
     cdef float n = full_length - length
 
+    if full_length == 0: #Fix for something that seems unknown... (We warn if this happens)
+        full_length = 1
+
     cdef float x = (n * p0.x + length * p1.x) / full_length
     cdef float y = (n * p0.y + length * p1.y) / full_length
+
     return Vec2(x, y)
 
 cpdef float angle_from_points(Vec2 p0, Vec2 p1):

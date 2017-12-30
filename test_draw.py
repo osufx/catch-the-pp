@@ -15,6 +15,7 @@ for hitobject in beatmap.hitobjects:
     tur.pencolor("red")
     if 2 & hitobject.type:
         tur.dot(6)
+        print(hitobject.timing_point)
         #for point in hitobject.path:
             #tur.goto(point.x, -point.y)
             #time.sleep(0.1)

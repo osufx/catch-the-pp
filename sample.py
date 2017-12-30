@@ -10,9 +10,9 @@ else:
 if len(sys.argv) >= 3:
     mods = int(sys.argv[2])
 else:
-    mods = 0
+    mods = 64
 
-difficulty = catchthepp.Difficulty(beatmap, 0)
+difficulty = catchthepp.Difficulty(beatmap, mods)
 print("Calculation:")
 print("Stars: {}, PP: {}, MaxCombo: {}\n".format(difficulty.star_rating, catchthepp.calculate_pp(difficulty, 1, beatmap.max_combo, 0), beatmap.max_combo))
 

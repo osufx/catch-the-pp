@@ -63,6 +63,7 @@ class HitObject(object):
                 curve = curves.Perfect(self.curve_points)
             except:
                 curve = curves.Bezier(self.curve_points)
+                self.slider_type = "B"
         elif self.slider_type == "B":   #Bezier
             curve = curves.Bezier(self.curve_points)
         elif self.slider_type == "C":   #Catmull

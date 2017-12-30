@@ -10,8 +10,6 @@ tur.penup()
 tur.speed(2)
 
 for hitobject in beatmap.hitobjects:
-    if hitobject.time < 8000:
-        continue
     tur.goto(hitobject.x, -hitobject.y)
     tur.pendown()
     tur.pencolor("red")

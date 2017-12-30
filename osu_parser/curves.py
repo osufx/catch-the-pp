@@ -7,11 +7,10 @@ class Linear(object):   #Because it made sense at the time...
         self.pos = points
 
 class Bezier(object):
-    def __init__(self, points, use_anchorpoints = False):
+    def __init__(self, points):
         self.points = points
         self.order = len(self.points)
         self.pos = []
-        self.anchor = use_anchorpoints
         self.calc_points()
 
     def calc_points(self):
@@ -124,9 +123,8 @@ def get_point(p, length):
 def get_circum_circle(p):
     d = 2 * (p[0].x * (p[1].y - p[2].y) + p[1].x * (p[2].y - p[0].y) + p[2].x * (p[0].y - p[1].y))
 
-    if d == 0:  #TODO: Look into this
-        print("FALSE PARSE: {}".format(p))
-        d = 1
+    if d == 0:
+        raise Exception("Invalid circle! Unable to chose angle.")
 
     ux = ((pow(p[0].x, 2) + pow(p[0].y, 2)) * (p[1].y - p[2].y) + (pow(p[1].x, 2) + pow(p[1].y, 2)) * (p[2].y - p[0].y) + (pow(p[2].x, 2) + pow(p[2].y, 2)) * (p[0].y - p[1].y)) / d
     uy = ((pow(p[0].x, 2) + pow(p[0].y, 2)) * (p[2].x - p[1].x) + (pow(p[1].x, 2) + pow(p[1].y, 2)) * (p[0].x - p[2].x) + (pow(p[2].x, 2) + pow(p[2].y, 2)) * (p[1].x - p[0].x)) / d

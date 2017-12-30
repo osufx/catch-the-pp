@@ -1,6 +1,6 @@
 import math
-import constants
-from osu_parser import mathhelper
+from .. import constants
+from . import mathhelper
 
 class Linear(object):   #Because it made sense at the time...
     def __init__(self, points):

@@ -1,5 +1,5 @@
-from osu_parser import mathhelper
-from osu_parser.hitobject import HitObject
+from . import mathhelper
+from .hitobject import HitObject
 
 cdef class Beatmap(object):
     """

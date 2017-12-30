@@ -1,5 +1,5 @@
-import constants
-from osu_parser.mathhelper import clamp, sign
+from ... import constants
+from ...osu_parser.mathhelper import clamp, sign
 
 
 cdef class DifficultyObject:

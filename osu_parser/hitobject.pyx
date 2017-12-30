@@ -1,5 +1,6 @@
 import copy
-from osu_parser import mathhelper, curves
+from . import mathhelper
+from . import curves
 
 cdef class SliderTick:
     cdef public float x, y, time

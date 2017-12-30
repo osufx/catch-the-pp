@@ -1,11 +1,12 @@
+import os
 import sys
 
-from osu_parser.beatmap import Beatmap
-from osu.ctb.difficulty import Difficulty
-from ppCalc import calculate_pp
+from .osu_parser.beatmap import Beatmap
+from .osu.ctb.difficulty import Difficulty
+from .ppCalc import calculate_pp
 
 if len(sys.argv) <= 1:
-    beatmap = Beatmap("test.osu")  # Yes... this be my test file (Will remove when project is done)
+    beatmap = Beatmap(os.path.dirname(os.path.realpath(__file__)) + "/test.osu")  # Yes... this be my test file (Will remove when project is done)
 else:
     beatmap = Beatmap(sys.argv[1])
 

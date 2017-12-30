@@ -38,8 +38,8 @@ for hitobject in beatmap.hitobjects:
             i += 1
             tur.dot(6, "gray")
         
-        tur.goto(hitobject.end.x, -hitobject.end.y)
-        print("time: {}, x: {}, y: {}, type: sliderEnd".format(hitobject.end.time, hitobject.end.x, hitobject.end.y))
+        #tur.goto(hitobject.end.x, -hitobject.end.y)
+        #print("time: {}, x: {}, y: {}, type: sliderEnd".format(hitobject.end.time, hitobject.end.x, hitobject.end.y))
         tur.pencolor("green")
         tur.dot(6)
     else:

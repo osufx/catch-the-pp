@@ -19,7 +19,7 @@ for hitobject in beatmap.hitobjects:
         #for point in hitobject.path:
             #tur.goto(point.x, -point.y)
             #time.sleep(0.1)
-        print("time: {}, x: {}, y: {}, type: sliderStart, duration: {}".format(hitobject.time, hitobject.x, hitobject.y, hitobject.duration))
+        print("time: {}, x: {}, y: {}, type: sliderStart, duration: {}, repeat: {}, ticks: {}".format(hitobject.time, hitobject.x, hitobject.y, hitobject.duration, hitobject.repeat, len(hitobject.ticks)))
         
         i = 0
         for tick in hitobject.ticks:

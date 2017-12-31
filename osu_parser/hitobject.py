@@ -126,7 +126,7 @@ class HitObject(object):
             repeat_ticks = copy.deepcopy(self.ticks)
 
             if 1 & repeat_id: #We have to reverse the timing normalizer
-                #repeat_ticks = list(reversed(repeat_ticks))
+                repeat_ticks = list(reversed(repeat_ticks))
                 normalize_time_value = self.time + (self.duration / self.repeat)
             else:
                 normalize_time_value = self.time

@@ -123,10 +123,7 @@ class Beatmap(object):
 
             tick_distance = (100 * self.difficulty["SliderMultiplier"]) / self.difficulty["SliderTickRate"]
             if self.version >= 8:
-                #tick_distance /= time_point["spm"]
                 tick_distance /= (mathhelper.clamp(-time_point["raw_spm"], 10, 1000) / 100)
-
-            #tick_distance /= time_point["spm"]
 
             curve_split = split_object[5].split("|")
             curve_points = []

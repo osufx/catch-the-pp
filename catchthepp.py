@@ -389,7 +389,7 @@ class HitObject(object):
 
         while current_distance < self.pixel_length - self.tick_distance / 8:
             if self.slider_type == "L":     #Linear
-                point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], current_distance)
+                point = point_on_line(self.curve_points[0], self.curve_points[1], current_distance)
             else:   #Perfect, Bezier & Catmull uses the same function
                 point = curve.point_at_distance(current_distance)
 
@@ -404,7 +404,7 @@ class HitObject(object):
             time_offset = (self.duration / self.repeat) * repeat_id
 
             if self.slider_type == "L":     #Linear
-                point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], dist)
+                point = point_on_line(self.curve_points[0], self.curve_points[1], dist)
             else:   #Perfect, Bezier & Catmull uses the same function
                 point = curve.point_at_distance(dist)
 
@@ -432,7 +432,7 @@ class HitObject(object):
         #Add endpoint for slider
         dist_end = (1 & self.repeat) * self.pixel_length
         if self.slider_type == "L":     #Linear
-            point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], dist_end)
+            point = point_on_line(self.curve_points[0], self.curve_points[1], dist_end)
         else:   #Perfect, Bezier & Catmull uses the same function
             point = curve.point_at_distance(dist_end)
 

@@ -99,6 +99,9 @@ cdef class Beatmap(object):
             self.timing_points["spm"][timing_point_time] = -100 / float(timing_point_focus) #Convert to normalized value and store
             self.timing_points["raw_spm"][timing_point_time] = float(timing_point_focus)
         else:
+            if len(self.timing_points["bpm"]) == 0: #Fixes if hitobjects shows up before bpm is set
+                timing_point_time = 0
+
             self.timing_points["bpm"][timing_point_time] = 60000 / float(timing_point_focus)#^
             self.timing_points["raw_bpm"][timing_point_time] = float(timing_point_focus)
             #This trash of a game resets the spm when bpm change >.>
@@ -164,7 +167,7 @@ cdef class Beatmap(object):
         return -- {"raw_bpm": Float, "raw_spm": Float, "bpm": Float, "spm": Float}
         """
         types = {
-            "raw_bpm": 60000,
+            "raw_bpm": 600,
             "raw_spm": -100,
             "bpm": 100,
             "spm": 1

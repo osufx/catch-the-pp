@@ -86,7 +86,10 @@ class Beatmap(object):
         timing_point_split = timing_point.split(",")
         timing_point_time = int(float(timing_point_split[0])) #Fixes some special mappers special needs
         timing_point_focus = timing_point_split[1]
-        timing_point_type = int(timing_point_split[6])
+
+        timing_point_type = 1
+        if len(timing_point_split) > 2: #Fix for old beatmaps that only stores bpm change and timestamp (only BPM change) [v3?]
+            timing_point_type = int(timing_point_split[6])
 
         if timing_point_type == 0 and not timing_point_focus.startswith("-"):
             timing_point_focus = "-100"

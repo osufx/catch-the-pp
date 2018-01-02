@@ -112,14 +112,6 @@ cdef class HitObject(object):
             self.ticks.append(SliderTick(point.x, point.y, self.time + time_add * (len(self.ticks) + 1)))
             current_distance += self.tick_distance
 
-        if self.repeat == 1:
-            if self.slider_type == "L":     #Linear
-                point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], self.pixel_length)
-            else:   #Perfect, Bezier & Catmull uses the same function
-                point = curve.point_at_distance(self.pixel_length)
-
-            self.end_ticks.append(SliderTick(point.x, point.y, self.time + self.duration))
-
         #Adds slider_ends / repeat_points
         repeat_id = 1
         repeat_bonus_ticks = []
@@ -138,7 +130,7 @@ cdef class HitObject(object):
             repeat_ticks = copy.deepcopy(self.ticks)
 
             if 1 & repeat_id: #We have to reverse the timing normalizer
-                #repeat_ticks = list(reversed(repeat_ticks))
+                repeat_ticks = list(reversed(repeat_ticks))
                 normalize_time_value = self.time + (self.duration / self.repeat)
             else:
                 normalize_time_value = self.time
@@ -152,6 +144,15 @@ cdef class HitObject(object):
             repeat_id += 1
 
         self.ticks += repeat_bonus_ticks
+
+        #Add endpoint for slider
+        dist_end = (1 & self.repeat) * self.pixel_length
+        if self.slider_type == "L":     #Linear
+            point = mathhelper.point_on_line(self.curve_points[0], self.curve_points[1], dist_end)
+        else:   #Perfect, Bezier & Catmull uses the same function
+            point = curve.point_at_distance(dist_end)
+
+        self.end_ticks.append(SliderTick(point.x, point.y, self.time + self.duration))
 
     def get_combo(self):
         """

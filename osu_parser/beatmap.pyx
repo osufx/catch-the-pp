@@ -11,7 +11,7 @@ cdef class Beatmap(object):
     cdef public int header
     cdef public dict difficulty
     cdef public dict timing_points
-    cdef public int slider_point_distance
+    cdef public float slider_point_distance
     cdef public list hitobjects
     cdef public int max_combo
 

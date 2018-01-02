@@ -140,7 +140,7 @@ cdef class Vec2(object):
         cdef float y = self.y - other.y
         return (x*x + y*y) ** 0.5  #sqrt, lol
 
-    cpdef float calc(self, Vec2 value, Vec2 other):   #I dont know what to call this function yet
+    cpdef Vec2 calc(Vec2 self, float value, Vec2 other):   #I dont know what to call this function yet
         cdef float x = self.x + value * other.x
         cdef float y = self.y + value * other.y
         return Vec2(x, y)

@@ -96,7 +96,7 @@ cdef class Beatmap(object):
         timing_point_focus = timing_point_split[1]
 
         timing_point_type = 1
-        if len(timing_point_split) >= 6: #Fix for old beatmaps that only stores bpm change and timestamp (only BPM change) [v3?]
+        if len(timing_point_split) >= 7: #Fix for old beatmaps that only stores bpm change and timestamp (only BPM change) [v3?]
             timing_point_type = int(timing_point_split[6])
 
         if timing_point_type == 0 and not timing_point_focus.startswith("-"):

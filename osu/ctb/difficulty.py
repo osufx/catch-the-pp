@@ -92,6 +92,15 @@ class Difficulty(object):
         self.beatmap = beatmap
         self.mods = mods
 
+        #Difficulty modifier by mod
+        for diff in self.beatmap.difficulty.keys():
+            if diff == "CircleSize":
+                scala = 1.3
+            else:
+                scala = 1.4
+            
+            self.beatmap.difficulty[diff] = self.adjust_difficulty(self.beatmap.difficulty[diff], self.mods, scala)
+
         self.hitobjects_with_ticks = []
         for hitobject in self.beatmap.hitobjects:
             self.hitobjects_with_ticks.append(hitobject)
@@ -105,7 +114,7 @@ class Difficulty(object):
 
         #Do the calculation
         self.time_rate = self.get_time_rate()
-        self.player_width = 305 / 1.6 * ((102.4 * (1 - 0.7 * self.adjust_difficulty(self.beatmap.difficulty["CircleSize"], self.mods))) / 128) * 0.7
+        self.player_width = 305 / 1.6 * ((102.4 * (1 - 0.7 * (self.beatmap.difficulty["CircleSize"] - 5) / 5)) / 128) * 0.7
 
         for hitobject in self.hitobjects_with_ticks:
             self.difficulty_objects.append(DifficultyObject(hitobject, self.player_width * 0.4))
@@ -119,7 +128,8 @@ class Difficulty(object):
 
         self.star_rating = pow(self.calculate_difficulty(), 0.5) * constants.STAR_SCALING_FACTOR
 
-    def adjust_difficulty(self, diff, mods):
+
+    def adjust_difficulty(self, diff, mods, scala):
         """
         Scale difficulty from selected mods.
 
@@ -130,9 +140,9 @@ class Difficulty(object):
         if mods & 1 << 1 > 0:       #EZ
             diff = max(0, diff / 2)
         if mods & 1 << 4 > 0:       #HR
-            diff = min(10, diff * 1.3)
+            diff = min(10, diff * scala)
 
-        return (diff - 5) / 5
+        return diff
 
     def get_time_rate(self):
         """

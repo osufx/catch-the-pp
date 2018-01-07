@@ -35,7 +35,10 @@ class Beatmap(object):
         Parses beatmap file line by line by passing each line into parse_line.
         """
         with open(self.file_name, encoding="utf8") as file_stream:
-            self.version = int(''.join(list(filter(str.isdigit, file_stream.readline()))))  #Set version
+            ver_line = ""
+            while len(ver_line) < 2: #Find the line where beatmap version is spesified (normaly first line)
+                ver_line = file_stream.readline()
+            self.version = int(''.join(list(filter(str.isdigit, ver_line))))  #Set version
             for line in file_stream:
                 self.parse_line(line.replace("\n", ""))
 

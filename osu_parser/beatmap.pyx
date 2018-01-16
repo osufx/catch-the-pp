@@ -43,7 +43,10 @@ cdef class Beatmap(object):
         """
         cdef str line
         with open(self.file_name, encoding="utf8") as file_stream:
-            self.version = int(''.join(list(filter(str.isdigit, file_stream.readline()))))  #Set version
+            ver_line = ""
+            while len(ver_line) < 2: #Find the line where beatmap version is spesified (normaly first line)
+                ver_line = file_stream.readline()
+            self.version = int(''.join(list(filter(str.isdigit, ver_line))))  #Set version
             for line in file_stream:
                 self.parse_line(line.replace("\n", ""))
 
@@ -156,7 +159,10 @@ cdef class Beatmap(object):
                         del curve_points[0]
                         slider_type = "L"
 
-            hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type, slider_type, curve_points, repeat, pixel_length, time_point, self.difficulty, tick_distance)
+            if len(curve_points) == 0: #Incase of ExGon meme (Sliders that acts like hitcircles)
+                hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, 1)
+            else:
+                hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type, slider_type, curve_points, repeat, pixel_length, time_point, self.difficulty, tick_distance)
         else:
             hitobject = HitObject(int(split_object[0]), int(split_object[1]), time, object_type)
 

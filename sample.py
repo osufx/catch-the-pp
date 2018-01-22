@@ -1,8 +1,8 @@
 import sys
 
-from osu_parser.beatmap import Beatmap
-from osu.ctb.difficulty import Difficulty
-from ppCalc import calculate_pp
+from catch_the_pp.osu_parser.beatmap import Beatmap
+from catch_the_pp.osu.ctb.difficulty import Difficulty
+from catch_the_pp.ppCalc import calculate_pp
 
 if len(sys.argv) <= 1:
     beatmap = Beatmap("test.osu") #Yes... this be my test file (Will remove when project is done)

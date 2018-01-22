@@ -1,6 +1,6 @@
 import math
 import copy
-from osu_parser import mathhelper, curves
+from . import mathhelper, curves
 
 class SliderTick(object):
     def __init__(self, x, y, time):

@@ -176,7 +176,7 @@ cdef class Difficulty:
         Update hyperdash_distance value for every hitobject in the beatmap.
         """
         cdef int last_direction = 0, direction, i
-        cdef float player_width_half = self.player_width / 2
+        cdef float player_width_half = self.player_width / 2 * 0.8
         cdef float last = player_width_half
 
         cdef object current_object, next_object
